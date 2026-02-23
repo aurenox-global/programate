@@ -1,0 +1,2290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Ultimate Pro - Tahoe Glass</title>
+
+    <!-- Google Fonts — DM Sans (SF Pro feel, but distinctive) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"DM Sans"', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'sans-serif'],
+                        mono: ['"DM Mono"', 'SF Mono', 'ui-monospace', 'monospace'],
+                    },
+                    animation: {
+                        'blob': 'blob 12s infinite ease-in-out',
+                        'shimmer': 'shimmer 3s infinite linear',
+                        'breathe': 'breathe 8s ease-in-out infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%,100%': { transform: 'translate(0,0) scale(1)' },
+                            '33%': { transform: 'translate(40px,-60px) scale(1.08)' },
+                            '66%': { transform: 'translate(-30px,20px) scale(0.94)' },
+                        },
+                        shimmer: {
+                            '0%': { backgroundPosition: '-200% center' },
+                            '100%': { backgroundPosition: '200% center' },
+                        },
+                        breathe: {
+                            '0%,100%': { transform: 'scale(1)', opacity: '0.8' },
+                            '50%': { transform: 'scale(1.2)', opacity: '1' },
+                        },
+                        float: {
+                            '0%,100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ============================================================
+           macOS TAHOE — LIQUID GLASS DESIGN SYSTEM
+           ============================================================ */
+
+        :root {
+            /* Glass layers */
+            --glass-blur: blur(52px) saturate(190%) brightness(1.06);
+            --glass-blur-heavy: blur(72px) saturate(200%);
+            --glass-blur-light-mode: blur(40px) saturate(170%);
+
+            /* Specular & refraction */
+            --specular-top: rgba(255,255,255,0.82);
+            --specular-thin: rgba(255,255,255,0.95);
+            --prism-pink: rgba(255,80,180,0.10);
+            --prism-blue: rgba(80,170,255,0.10);
+            --prism-green: rgba(120,255,140,0.07);
+
+            /* Shadows */
+            --shadow-elevation-1:
+                0 0 0 0.5px rgba(255,255,255,0.14) inset,
+                0 1px 0 0.5px rgba(255,255,255,0.26) inset,
+                0 2px 6px rgba(0,0,0,0.10),
+                0 8px 20px rgba(0,0,0,0.14),
+                0 24px 48px rgba(0,0,0,0.10);
+            --shadow-elevation-2:
+                0 0 0 0.5px rgba(255,255,255,0.18) inset,
+                0 1px 0 0.5px rgba(255,255,255,0.32) inset,
+                0 4px 12px rgba(0,0,0,0.16),
+                0 16px 40px rgba(0,0,0,0.22),
+                0 48px 80px rgba(0,0,0,0.16);
+            --shadow-light-1:
+                0 0 0 0.5px rgba(255,255,255,0.95) inset,
+                0 1px 0 rgba(255,255,255,1) inset,
+                0 2px 8px rgba(0,0,0,0.06),
+                0 8px 24px rgba(0,0,0,0.09),
+                0 24px 48px rgba(0,0,0,0.05);
+
+            /* Transitions */
+            --t-glass: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ---- Base ---- */
+        html { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; }
+        * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+        /* ---- Noise SVG Texture (applied via filter) ---- */
+        .noise-layer {
+            position: absolute; inset: 0;
+            opacity: 0.028;
+            pointer-events: none;
+            z-index: 2;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 128px 128px;
+            border-radius: inherit;
+        }
+
+        /* ---- Scrollbar ---- */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(120,120,140,0.25); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(120,120,140,0.45); }
+        .dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.16); }
+        .dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.30); }
+
+        /* ============================================================
+           LIQUID GLASS WIDGET — macOS Tahoe signature look
+           ============================================================ */
+        .glass-widget {
+            position: relative;
+            overflow: hidden;
+            border-radius: 22px;
+            transition: var(--t-glass);
+            isolation: isolate;
+
+            /* Dark mode glass (default) */
+            background: rgba(18, 18, 28, 0.42);
+            border: 1px solid rgba(255,255,255,0.0);
+            border-top-color: rgba(255,255,255,0.22);
+            border-left-color: rgba(255,255,255,0.10);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            box-shadow: var(--shadow-elevation-1);
+        }
+
+        /* TOP SPECULAR HIGHLIGHT LINE — the Apple signature detail */
+        .glass-widget::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 12px; right: 12px;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                var(--specular-thin) 25%,
+                rgba(255,255,255,1) 50%,
+                var(--specular-thin) 75%,
+                transparent 100%
+            );
+            z-index: 10;
+            border-radius: 99px;
+        }
+
+        /* INNER TOP GLOW — upper glass face catch-light */
+        .glass-widget::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 55%;
+            background: linear-gradient(180deg,
+                rgba(255,255,255,0.07) 0%,
+                rgba(255,255,255,0.02) 40%,
+                transparent 100%
+            );
+            z-index: 1;
+            pointer-events: none;
+            border-radius: 22px 22px 0 0;
+        }
+
+        /* PRISM REFRACTION EDGE (left side) */
+        .glass-widget .prism-edge {
+            position: absolute;
+            top: 6px; bottom: 6px; left: 0;
+            width: 2px;
+            background: linear-gradient(180deg,
+                var(--prism-pink) 0%,
+                var(--prism-blue) 50%,
+                var(--prism-green) 100%
+            );
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: 10;
+            border-radius: 99px;
+        }
+
+        .glass-widget:hover .prism-edge {
+            opacity: 1;
+        }
+
+        /* HOVER STATE — lift + deepen glass */
+        .glass-widget:hover {
+            transform: translateY(-3px) scale(1.002);
+            box-shadow: var(--shadow-elevation-2);
+            border-top-color: rgba(255,255,255,0.32);
+        }
+
+        /* ---- LIGHT MODE glass variant ---- */
+        .light .glass-widget {
+            background: rgba(252, 252, 255, 0.62);
+            border-top-color: rgba(255,255,255,0.96);
+            border-left-color: rgba(255,255,255,0.72);
+            border-right-color: rgba(200,200,220,0.25);
+            border-bottom-color: rgba(180,180,200,0.20);
+            backdrop-filter: var(--glass-blur-light-mode);
+            -webkit-backdrop-filter: var(--glass-blur-light-mode);
+            box-shadow: var(--shadow-light-1);
+        }
+
+        .light .glass-widget::after {
+            background: linear-gradient(180deg,
+                rgba(255,255,255,0.55) 0%,
+                rgba(255,255,255,0.18) 40%,
+                transparent 100%
+            );
+        }
+
+        .light .glass-widget::before {
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.98) 20%,
+                white 50%,
+                rgba(255,255,255,0.98) 80%,
+                transparent 100%
+            );
+        }
+
+        /* ============================================================
+           GLASS HEADER — deeper blur, stronger specular
+           ============================================================ */
+        .glass-header {
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            backdrop-filter: blur(72px) saturate(200%) brightness(1.08);
+            -webkit-backdrop-filter: blur(72px) saturate(200%) brightness(1.08);
+            background: rgba(14, 14, 22, 0.52);
+            border: 1px solid rgba(255,255,255,0.0);
+            border-top-color: rgba(255,255,255,0.28);
+            border-left-color: rgba(255,255,255,0.12);
+            box-shadow:
+                0 0 0 0.5px rgba(255,255,255,0.16) inset,
+                0 1px 0 rgba(255,255,255,0.28) inset,
+                0 8px 32px rgba(0,0,0,0.22),
+                0 32px 80px rgba(0,0,0,0.18);
+            isolation: isolate;
+        }
+
+        .glass-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 16px; right: 16px; height: 1px;
+            background: linear-gradient(90deg, transparent, white 30%, white 70%, transparent);
+            z-index: 10;
+        }
+
+        .glass-header::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 60%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, transparent 100%);
+            z-index: 1;
+            pointer-events: none;
+            border-radius: 28px 28px 0 0;
+        }
+
+        .light .glass-header {
+            background: rgba(248, 248, 255, 0.70);
+            border-top-color: rgba(255,255,255,0.98);
+            box-shadow:
+                0 0 0 0.5px rgba(255,255,255,0.98) inset,
+                0 1px 0 white inset,
+                0 4px 16px rgba(0,0,0,0.08),
+                0 20px 60px rgba(0,0,0,0.08);
+        }
+
+        /* ============================================================
+           GLASS MODAL
+           ============================================================ */
+        .glass-modal {
+            position: relative;
+            overflow: hidden;
+            border-radius: 28px;
+            backdrop-filter: blur(80px) saturate(200%);
+            -webkit-backdrop-filter: blur(80px) saturate(200%);
+            background: rgba(10, 10, 18, 0.68);
+            border: 1px solid rgba(255,255,255,0.0);
+            border-top-color: rgba(255,255,255,0.24);
+            border-left-color: rgba(255,255,255,0.10);
+            box-shadow:
+                0 0 0 0.5px rgba(255,255,255,0.12) inset,
+                0 1px 0 rgba(255,255,255,0.22) inset,
+                0 24px 80px rgba(0,0,0,0.42),
+                0 80px 160px rgba(0,0,0,0.28);
+            isolation: isolate;
+        }
+
+        .glass-modal::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 20px; right: 20px; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9) 25%, white 50%, rgba(255,255,255,0.9) 75%, transparent);
+            z-index: 10;
+        }
+
+        .light .glass-modal {
+            background: rgba(245, 245, 252, 0.80);
+            border-top-color: white;
+            box-shadow:
+                0 0 0 0.5px white inset,
+                0 1px 0 white inset,
+                0 12px 60px rgba(0,0,0,0.14),
+                0 60px 120px rgba(0,0,0,0.10);
+        }
+
+        /* ============================================================
+           GLASS BUTTONS
+           ============================================================ */
+        .glass-btn {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+            background: rgba(255,255,255,0.10);
+            border: 1px solid rgba(255,255,255,0.0);
+            border-top-color: rgba(255,255,255,0.28);
+            transition: var(--t-glass);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.18) inset,
+                        0 2px 8px rgba(0,0,0,0.12);
+        }
+
+        .glass-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 20%; right: 20%; height: 1px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 99px;
+        }
+
+        .glass-btn:hover {
+            background: rgba(255,255,255,0.16);
+            border-top-color: rgba(255,255,255,0.40);
+            transform: translateY(-1px);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.24) inset,
+                        0 6px 20px rgba(0,0,0,0.18);
+        }
+
+        .glass-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .light .glass-btn {
+            background: rgba(255,255,255,0.68);
+            border-top-color: white;
+            box-shadow: 0 1px 0 white inset, 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        /* ============================================================
+           GLASS INPUTS
+           ============================================================ */
+        .glass-input {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-top-color: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: var(--t-glass);
+            color: inherit;
+        }
+
+        .glass-input:focus {
+            background: rgba(255,255,255,0.10);
+            border-color: rgba(130,120,255,0.50);
+            border-top-color: rgba(255,255,255,0.14);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(130,120,255,0.15),
+                        0 1px 0 rgba(255,255,255,0.10) inset;
+        }
+
+        .light .glass-input {
+            background: rgba(255,255,255,0.72);
+            border-color: rgba(180,180,200,0.35);
+            border-top-color: rgba(255,255,255,0.9);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset;
+        }
+
+        .light .glass-input:focus {
+            background: rgba(255,255,255,0.90);
+            border-color: rgba(100,90,220,0.45);
+            box-shadow: 0 0 0 3px rgba(100,90,220,0.12), 0 1px 0 white inset;
+        }
+
+        /* ============================================================
+           GLASS THEME PILLS
+           ============================================================ */
+        .glass-pill {
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            border-radius: 14px;
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-top-color: rgba(255,255,255,0.20);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.14) inset;
+            gap: 2px;
+        }
+
+        .light .glass-pill {
+            background: rgba(255,255,255,0.60);
+            border-color: rgba(200,200,220,0.30);
+            border-top-color: rgba(255,255,255,0.90);
+        }
+
+        .glass-pill-btn {
+            padding: 6px 8px;
+            border-radius: 10px;
+            transition: var(--t-glass);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-pill-btn.active {
+            background: rgba(255,255,255,0.16);
+            box-shadow: 0 0 0 0.5px rgba(255,255,255,0.24) inset,
+                        0 1px 0 rgba(255,255,255,0.28) inset,
+                        0 2px 8px rgba(0,0,0,0.20);
+        }
+
+        .glass-pill-btn.active::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 10%; right: 10%; height: 1px;
+            background: rgba(255,255,255,0.7);
+        }
+
+        .light .glass-pill-btn.active {
+            background: rgba(255,255,255,0.90);
+            box-shadow: 0 0 0 0.5px rgba(255,255,255,1) inset,
+                        0 1px 0 white inset,
+                        0 2px 8px rgba(0,0,0,0.10);
+        }
+
+        .glass-pill-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* ============================================================
+           DRAG HANDLE
+           ============================================================ */
+        .drag-handle {
+            cursor: grab;
+            position: absolute;
+            top: 10px; right: 10px;
+            z-index: 20;
+            padding: 6px;
+            border-radius: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease, background 0.2s ease;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.10);
+        }
+
+        .glass-widget:hover .drag-handle { opacity: 1; }
+        .drag-handle:hover { background: rgba(255,255,255,0.14); }
+        .drag-handle:active { cursor: grabbing; background: rgba(255,255,255,0.20); }
+
+        @media (max-width: 768px) {
+            .drag-handle { opacity: 1; }
+        }
+
+        /* ============================================================
+           SORTABLE
+           ============================================================ */
+        .sortable-ghost {
+            opacity: 0.35;
+            background: rgba(120,100,255,0.14);
+            border: 1.5px dashed rgba(120,100,255,0.5);
+            box-shadow: none;
+        }
+
+        .sortable-drag {
+            cursor: grabbing;
+            opacity: 1;
+            transform: scale(1.04) rotate(0.8deg);
+            box-shadow: var(--shadow-elevation-2) !important;
+        }
+
+        /* ============================================================
+           BACKGROUNDS
+           ============================================================ */
+        body.dark-bg {
+            background: radial-gradient(ellipse at 20% 10%, #1a1030 0%, #0a0814 50%, #060510 100%);
+        }
+
+        body.light-bg {
+            background: radial-gradient(ellipse at 30% 0%, #e8e0ff 0%, #f0f4ff 40%, #f8f6ff 100%);
+        }
+
+        .bg-animated {
+            position: fixed;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ============================================================
+           RESPONSIVE GRID
+           ============================================================ */
+        .dashboard-grid {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 640px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+        @media (min-width: 768px) { .dashboard-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; } }
+        @media (min-width: 1024px) { .dashboard-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
+        @media (min-width: 1280px) { .dashboard-grid { grid-template-columns: repeat(5, 1fr); gap: 20px; } }
+
+        .widget-span-2 { grid-column: span 1; }
+        .widget-span-rows-2 { grid-row: span 1; }
+
+        @media (min-width: 768px) {
+            .widget-span-2 { grid-column: span 2; }
+            .widget-span-rows-2 { grid-row: span 2; }
+        }
+
+        /* ============================================================
+           THEME TRANSITION
+           ============================================================ */
+        .theme-transition {
+            transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+        }
+
+        /* ============================================================
+           MISC COMPONENTS
+           ============================================================ */
+        .task-complete { text-decoration: line-through; opacity: 0.45; transition: all 0.3s ease; }
+        .progress-ring-circle { transition: stroke-dashoffset 0.5s ease-in-out; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .kanban-card { cursor: grab; }
+        .kanban-card:active { cursor: grabbing; }
+        .mood-emoji { transition: all 0.3s ease; }
+        .mood-emoji:hover { transform: scale(1.2); }
+        .mood-selected { transform: scale(1.3); filter: drop-shadow(0 0 10px currentColor); }
+        .calc-btn { transition: all 0.1s; }
+        .calc-btn:active { transform: scale(0.95); }
+
+        /* Touch targets */
+        @media (max-width: 768px) {
+            .touch-target { min-height: 44px; min-width: 44px; }
+        }
+
+        /* Action buttons */
+        .widget-actions { display: flex; gap: 4px; align-items: center; }
+
+        .action-btn {
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            opacity: 0.55;
+        }
+
+        .action-btn:hover { opacity: 1; background: rgba(255,255,255,0.10); }
+        .action-btn.delete:hover { color: #ef4444; background: rgba(239,68,68,0.12); }
+        .action-btn.check:hover { color: #22c55e; background: rgba(34,197,94,0.12); }
+        .action-btn.reset:hover { color: #f59e0b; background: rgba(245,158,11,0.12); }
+
+        /* Float animation */
+        .float-animation { animation: float 6s ease-in-out infinite; }
+
+        /* Gradient text helper */
+        .text-gradient {
+            background: linear-gradient(135deg, currentColor 0%, rgba(168,85,247,0.85) 50%, rgba(236,72,153,0.80) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Shimmer effect for active elements */
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
+        }
+
+        /* Purple accent glass button */
+        .glass-btn-accent {
+            background: linear-gradient(135deg, rgba(139,92,246,0.70) 0%, rgba(167,139,250,0.50) 100%);
+            border: 1px solid rgba(255,255,255,0.0);
+            border-top-color: rgba(255,255,255,0.30);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.20) inset,
+                        0 4px 16px rgba(120,90,255,0.28);
+            transition: var(--t-glass);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-btn-accent::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 15%; right: 15%; height: 1px;
+            background: rgba(255,255,255,0.65);
+        }
+
+        .glass-btn-accent:hover {
+            background: linear-gradient(135deg, rgba(139,92,246,0.85) 0%, rgba(167,139,250,0.65) 100%);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.24) inset,
+                        0 8px 24px rgba(120,90,255,0.38);
+            transform: translateY(-1px);
+        }
+
+        /* Danger glass button */
+        .glass-btn-danger {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.20);
+            border-top-color: rgba(255,255,255,0.12);
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            color: #f87171;
+            transition: var(--t-glass);
+        }
+
+        .glass-btn-danger:hover {
+            background: rgba(239,68,68,0.20);
+            box-shadow: 0 4px 16px rgba(239,68,68,0.16);
+        }
+
+        /* Language menu */
+        .glass-dropdown {
+            background: rgba(14,14,22,0.88);
+            border: 1px solid rgba(255,255,255,0.0);
+            border-top-color: rgba(255,255,255,0.20);
+            border-radius: 16px;
+            backdrop-filter: blur(60px) saturate(200%);
+            -webkit-backdrop-filter: blur(60px) saturate(200%);
+            box-shadow: 0 1px 0 rgba(255,255,255,0.16) inset,
+                        0 8px 32px rgba(0,0,0,0.40);
+            overflow: hidden;
+        }
+
+        .light .glass-dropdown {
+            background: rgba(248,248,255,0.92);
+            border-top-color: white;
+            box-shadow: 0 1px 0 white inset, 0 8px 32px rgba(0,0,0,0.14);
+        }
+
+        .glass-dropdown-item {
+            padding: 9px 16px;
+            transition: background 0.2s ease;
+        }
+
+        .glass-dropdown-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .light .glass-dropdown-item:hover {
+            background: rgba(0,0,0,0.04);
+        }
+
+        /* Settings widget rows */
+        .glass-setting-row {
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.0);
+            border-top-color: rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+            transition: var(--t-glass);
+        }
+
+        .glass-setting-row:hover {
+            background: rgba(255,255,255,0.09);
+        }
+
+        .glass-setting-row.active {
+            background: rgba(120,100,255,0.14);
+            border-top-color: rgba(180,160,255,0.30);
+            border-color: rgba(120,100,255,0.25);
+        }
+
+        .light .glass-setting-row {
+            background: rgba(255,255,255,0.55);
+            border-top-color: rgba(255,255,255,0.92);
+            border-color: rgba(200,200,220,0.28);
+        }
+
+        .light .glass-setting-row:hover {
+            background: rgba(255,255,255,0.80);
+        }
+
+        .light .glass-setting-row.active {
+            background: rgba(110,90,220,0.10);
+            border-color: rgba(110,90,220,0.22);
+        }
+    </style>
+</head>
+<body class="theme-transition min-h-screen overflow-x-hidden"
+      :class="{
+          'dark dark-bg text-white': currentTheme === 'dark',
+          'light light-bg text-gray-900': currentTheme === 'light',
+          'dark dark-bg text-white': currentTheme === 'custom'
+      }"
+      x-data="dashboardApp()"
+      x-init="initApp()"
+      x-effect="onLanguageChange()">
+
+    <!-- NOISE OVERLAY (Tahoe glass texture) -->
+    <div style="position:fixed;inset:0;pointer-events:none;z-index:1;opacity:0.022;background-image:url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;);background-size:160px 160px;"></div>
+
+    <!-- ANIMATED BACKGROUND BLOBS -->
+    <div class="bg-animated" :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'opacity-100' : 'opacity-40'">
+        <div class="absolute top-[-10%] left-[10%] w-[560px] h-[560px] rounded-full filter blur-[120px] opacity-25 animate-blob"
+             :style="`background: ${currentTheme === 'custom' ? customColors.primary : '#7c3aed'}`"></div>
+        <div class="absolute top-[5%] right-[5%] w-[480px] h-[480px] rounded-full filter blur-[120px] opacity-20 animate-blob" style="animation-delay:3s"
+             :style="`background: ${currentTheme === 'custom' ? customColors.secondary : '#1d4ed8'}`"></div>
+        <div class="absolute bottom-[-5%] left-[30%] w-[520px] h-[520px] rounded-full filter blur-[140px] opacity-18 animate-blob" style="animation-delay:6s"
+             :style="`background: ${currentTheme === 'custom' ? customColors.accent : '#be185d'}`"></div>
+        <div class="absolute bottom-[20%] right-[20%] w-[360px] h-[360px] rounded-full filter blur-[100px] opacity-14 animate-blob" style="animation-delay:9s; background: #0891b2;"></div>
+        <!-- Overlay to deepen background -->
+        <div class="absolute inset-0" :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'bg-slate-950/30' : 'bg-white/40'"></div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="relative z-10 container mx-auto px-3 py-4 lg:px-6 lg:py-8 max-w-[1600px]">
+
+        <!-- HEADER -->
+        <header class="glass-header theme-transition p-5 lg:p-7 mb-5 lg:mb-7 relative z-30">
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="flex-1">
+                    <h1 class="text-2xl lg:text-[2.2rem] font-semibold tracking-tight"
+                        style="background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(200,180,255,0.90) 55%, rgba(255,130,200,0.85) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        <span x-text="t.greeting"></span>, <span x-text="userName"></span>
+                    </h1>
+                    <p class="mt-1.5 flex items-center gap-2 text-sm opacity-55 font-light tracking-wide">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 opacity-70"></i>
+                        <span x-text="currentDate"></span>
+                        <span class="opacity-30">•</span>
+                        <span x-text="currentTime" class="font-mono text-xs tracking-widest"></span>
+                    </p>
+                </div>
+
+                <!-- CONTROLS -->
+                <div class="flex flex-wrap items-center gap-2 lg:gap-3">
+
+                    <!-- Language selector -->
+                    <div class="relative">
+                        <button @click="showLangMenu = !showLangMenu"
+                                class="glass-btn flex items-center gap-2 px-3 py-2 rounded-xl touch-target text-sm">
+                            <span class="text-base" x-text="flags[currentLang]"></span>
+                            <span class="text-xs uppercase hidden sm:inline tracking-widest opacity-70" x-text="currentLang"></span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
+                        </button>
+                        <div x-show="showLangMenu" @click.away="showLangMenu = false"
+                             class="glass-dropdown absolute right-0 mt-2 w-44 z-50"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95">
+                            <div class="py-1">
+                                <template x-for="lang in ['es', 'en', 'de', 'zh', 'pl']">
+                                    <button @click="changeLang(lang)"
+                                            class="glass-dropdown-item w-full text-left flex items-center gap-3 text-sm">
+                                        <span x-text="flags[lang]"></span>
+                                        <span class="opacity-80" x-text="langNames[lang]"></span>
+                                        <i data-lucide="check" class="w-3 h-3 ml-auto text-purple-400" x-show="currentLang === lang"></i>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme pill -->
+                    <div class="glass-pill">
+                        <button @click="setTheme('light')"
+                                class="glass-pill-btn touch-target"
+                                :class="currentTheme === 'light' ? 'active text-amber-400' : 'opacity-40 hover:opacity-70'">
+                            <i data-lucide="sun" class="w-4 h-4"></i>
+                        </button>
+                        <button @click="setTheme('dark')"
+                                class="glass-pill-btn touch-target"
+                                :class="currentTheme === 'dark' ? 'active text-violet-300' : 'opacity-40 hover:opacity-70'">
+                            <i data-lucide="moon" class="w-4 h-4"></i>
+                        </button>
+                        <button @click="setTheme('custom'); showColorPicker = true"
+                                class="glass-pill-btn touch-target"
+                                :class="currentTheme === 'custom' ? 'active' : 'opacity-40 hover:opacity-70'">
+                            <i data-lucide="palette" class="w-4 h-4" :class="currentTheme === 'custom' ? 'text-pink-400' : ''"></i>
+                        </button>
+                    </div>
+
+                    <!-- Settings -->
+                    <button @click="showSettings = true"
+                            class="glass-btn p-2.5 rounded-xl touch-target opacity-75 hover:opacity-100">
+                        <i data-lucide="settings" class="w-4.5 h-4.5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- WIDGET GRID -->
+        <div x-ref="widgetGrid" class="dashboard-grid">
+            <template x-for="(widget, index) in activeWidgets" :key="widget.id">
+                <div :class="[widget.size === 'large' ? 'widget-span-2' : '', widget.tall ? 'widget-span-rows-2' : '']"
+                     class="glass-widget theme-transition p-4 lg:p-5 group relative">
+
+                    <!-- Prism edge -->
+                    <div class="prism-edge"></div>
+
+                    <!-- Drag handle -->
+                    <div class="drag-handle">
+                        <i data-lucide="grip-vertical" class="w-4 h-4 opacity-60"></i>
+                    </div>
+
+                    <!-- Widget content (z-index above pseudo-elements) -->
+                    <div class="relative z-10" x-html="renderWidget(widget)"></div>
+                </div>
+            </template>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div x-show="activeWidgets.length === 0" class="text-center py-24">
+            <div class="glass-widget inline-block p-8 rounded-3xl">
+                <i data-lucide="layout-grid" class="w-14 h-14 mx-auto mb-4 opacity-25"></i>
+                <p class="text-base opacity-50 mb-4" x-text="t.noWidgets"></p>
+                <button @click="showSettings = true" class="glass-btn-accent px-6 py-2.5 text-sm font-medium text-white">
+                    <span x-text="t.addWidgets"></span>
+                </button>
+            </div>
+        </div>
+
+        <footer class="mt-10 text-center text-xs opacity-25 tracking-wider font-light">
+            <p x-text="t.footer"></p>
+        </footer>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div x-show="showSettings"
+         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="glass-modal w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+             @click.away="showSettings = false"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+
+            <div class="relative z-10 p-6 border-b sticky top-0 backdrop-blur-xl rounded-t-[28px]"
+                 :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'border-white/10 bg-slate-950/60' : 'border-black/06 bg-white/70'">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold tracking-tight" x-text="t.settings"></h2>
+                    <button @click="showSettings = false"
+                            class="glass-btn p-2 rounded-xl opacity-60 hover:opacity-100">
+                        <i data-lucide="x" class="w-4.5 h-4.5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative z-10 p-6 space-y-7">
+                <!-- Widget selector -->
+                <div>
+                    <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 opacity-60 uppercase tracking-widest">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        <span x-text="t.availableWidgets"></span>
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <template x-for="widget in availableWidgets" :key="widget.id">
+                            <label class="glass-setting-row flex items-center gap-3 p-3 cursor-pointer"
+                                   :class="isWidgetActive(widget.id) ? 'active' : ''">
+                                <input type="checkbox"
+                                       :checked="isWidgetActive(widget.id)"
+                                       @change="toggleWidget(widget.id)"
+                                       class="w-4 h-4 rounded border-gray-300 accent-purple-500">
+                                <div class="flex-1">
+                                    <p class="font-medium text-sm" x-text="widget.name"></p>
+                                    <p class="text-xs opacity-45 mt-0.5" x-text="widget.description"></p>
+                                </div>
+                            </label>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Name input -->
+                <div>
+                    <h3 class="text-sm font-semibold mb-3 flex items-center gap-2 opacity-60 uppercase tracking-widest">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span x-text="t.personalization"></span>
+                    </h3>
+                    <input type="text" x-model="userName"
+                           class="glass-input w-full px-4 py-3 text-sm"
+                           :placeholder="t.yourName">
+                </div>
+
+                <!-- Reset -->
+                <div class="pt-4 border-t" :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'border-white/08' : 'border-black/06'">
+                    <button @click="resetAllData()"
+                            class="glass-btn-danger w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 text-sm">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <span>Restablecer todos los datos</span>
+                    </button>
+                    <p class="text-xs text-center mt-2 opacity-35 font-light">Esto eliminará todas las tareas, hábitos, notas y configuraciones guardadas</p>
+                </div>
+            </div>
+
+            <div class="relative z-10 p-6 border-t sticky bottom-0 backdrop-blur-xl rounded-b-[28px]"
+                 :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'border-white/10 bg-slate-950/60' : 'border-black/06 bg-white/70'">
+                <button @click="localStorage.setItem('userName', userName); localStorage.setItem('lang', currentLang); localStorage.setItem('theme', currentTheme); localStorage.setItem('customColors', JSON.stringify(customColors)); showSettings = false"
+                        class="glass-btn-accent w-full py-3 text-white font-medium text-sm rounded-xl">
+                    <span x-text="t.save"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COLOR PICKER MODAL -->
+    <div x-show="showColorPicker"
+         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         x-transition.opacity>
+        <div class="glass-modal w-full max-w-md p-7 relative z-10"
+             @click.away="showColorPicker = false"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100">
+
+            <div class="relative z-10">
+                <h3 class="text-xl font-semibold mb-5 tracking-tight" x-text="t.customColors"></h3>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs mb-3 opacity-50 uppercase tracking-widest" x-text="t.primaryColor"></label>
+                        <div class="flex gap-2.5 flex-wrap">
+                            <template x-for="color in colorPresets" :key="color">
+                                <button @click="customColors.primary = color"
+                                        class="w-9 h-9 rounded-full transition-all"
+                                        :class="customColors.primary === color ? 'scale-110 ring-2 ring-white/60 ring-offset-2 ring-offset-transparent' : 'opacity-70 hover:opacity-100'"
+                                        :style="`background: ${color}; box-shadow: 0 2px 8px ${color}55`"></button>
+                            </template>
+                            <input type="color" x-model="customColors.primary"
+                                   class="w-9 h-9 rounded-full overflow-hidden cursor-pointer border-none bg-transparent">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs mb-3 opacity-50 uppercase tracking-widest" x-text="t.secondaryColor"></label>
+                        <div class="flex gap-2.5 flex-wrap">
+                            <template x-for="color in colorPresets" :key="color">
+                                <button @click="customColors.secondary = color"
+                                        class="w-9 h-9 rounded-full transition-all"
+                                        :class="customColors.secondary === color ? 'scale-110 ring-2 ring-white/60 ring-offset-2 ring-offset-transparent' : 'opacity-70 hover:opacity-100'"
+                                        :style="`background: ${color}; box-shadow: 0 2px 8px ${color}55`"></button>
+                            </template>
+                            <input type="color" x-model="customColors.secondary"
+                                   class="w-9 h-9 rounded-full overflow-hidden cursor-pointer border-none bg-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-7">
+                    <button @click="showColorPicker = false"
+                            class="glass-btn-accent flex-1 py-3 text-white text-sm font-medium rounded-xl" x-text="t.apply">
+                    </button>
+                    <button @click="showColorPicker = false; setTheme('dark')"
+                            class="glass-btn px-5 py-3 text-sm rounded-xl opacity-60 hover:opacity-100" x-text="t.cancel">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== ALL SCRIPTS (unchanged logic) ======== -->
+    <script>
+        window.chartInstances = {};
+        window.previousLang = localStorage.getItem('lang') || 'es';
+
+        const translations = {
+            es: {
+                greeting: (h) => h < 12 ? 'Buenos días' : h < 18 ? 'Buenas tardes' : 'Buenas noches',
+                settings: 'Configuración', availableWidgets: 'Widgets Disponibles',
+                personalization: 'Personalización', yourName: 'Tu nombre', save: 'Guardar Cambios',
+                noWidgets: 'No hay widgets activos', addWidgets: 'Agregar Widgets',
+                customColors: 'Colores Personalizados', primaryColor: 'Color Primario',
+                secondaryColor: 'Color Secundario', apply: 'Aplicar', cancel: 'Cancelar',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Restablecer', clearCompleted: 'Limpiar completados',
+                quote: 'Cita del Día', word: 'Palabra del Día', water: 'Hidratación', steps: 'Pasos',
+                pomodoro: 'Pomodoro', calculator: 'Calculadora', calendar: 'Calendario',
+                breathing: 'Respiración', tasks: 'Tareas', notes: 'Notas Rápidas',
+                kanban: 'Kanban Board', analytics: 'Análisis', expenses: 'Gastos',
+                sleep: 'Sueño', mood: 'Estado de Ánimo', habits: 'Hábitos',
+                links: 'Accesos Rápidos', shopping: 'Lista de Compras', reading: 'Lectura', clock: 'Reloj Mundial'
+            },
+            en: {
+                greeting: (h) => h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening',
+                settings: 'Settings', availableWidgets: 'Available Widgets',
+                personalization: 'Personalization', yourName: 'Your name', save: 'Save Changes',
+                noWidgets: 'No active widgets', addWidgets: 'Add Widgets',
+                customColors: 'Custom Colors', primaryColor: 'Primary Color',
+                secondaryColor: 'Secondary Color', apply: 'Apply', cancel: 'Cancel',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Reset', clearCompleted: 'Clear completed',
+                quote: 'Daily Quote', word: 'Word of the Day', water: 'Hydration', steps: 'Steps',
+                pomodoro: 'Pomodoro', calculator: 'Calculator', calendar: 'Calendar',
+                breathing: 'Breathing', tasks: 'Tasks', notes: 'Quick Notes',
+                kanban: 'Kanban Board', analytics: 'Analytics', expenses: 'Expenses',
+                sleep: 'Sleep', mood: 'Mood Tracker', habits: 'Habits',
+                links: 'Quick Links', shopping: 'Shopping List', reading: 'Reading List', clock: 'World Clock'
+            },
+            de: {
+                greeting: (h) => h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend',
+                settings: 'Einstellungen', availableWidgets: 'Verfügbare Widgets',
+                personalization: 'Personalisierung', yourName: 'Dein Name', save: 'Änderungen Speichern',
+                noWidgets: 'Keine aktiven Widgets', addWidgets: 'Widgets Hinzufügen',
+                customColors: 'Benutzerdefinierte Farben', primaryColor: 'Primärfarbe',
+                secondaryColor: 'Sekundärfarbe', apply: 'Anwenden', cancel: 'Abbrechen',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Zurücksetzen', clearCompleted: 'Abgeschlossene löschen',
+                quote: 'Tägliches Zitat', word: 'Wort des Tages', water: 'Hydration', steps: 'Schritte',
+                pomodoro: 'Pomodoro', calculator: 'Taschenrechner', calendar: 'Kalender',
+                breathing: 'Atmung', tasks: 'Aufgaben', notes: 'Notizen',
+                kanban: 'Kanban Board', analytics: 'Analysen', expenses: 'Ausgaben',
+                sleep: 'Schlaf', mood: 'Stimmung', habits: 'Gewohnheiten',
+                links: 'Schnelllinks', shopping: 'Einkaufsliste', reading: 'Leseliste', clock: 'Weltuhr'
+            },
+            zh: {
+                greeting: (h) => h < 12 ? '早上好' : h < 18 ? '下午好' : '晚上好',
+                settings: '设置', availableWidgets: '可用小部件',
+                personalization: '个性化', yourName: '你的名字', save: '保存更改',
+                noWidgets: '没有活动的小部件', addWidgets: '添加小部件',
+                customColors: '自定义颜色', primaryColor: '主色', secondaryColor: '副色',
+                apply: '应用', cancel: '取消', footer: 'Dashboard Ultimate Pro • 液态玻璃版',
+                reset: '重置', clearCompleted: '清除已完成',
+                quote: '每日名言', word: '每日一词', water: '饮水', steps: '步数',
+                pomodoro: '番茄钟', calculator: '计算器', calendar: '日历',
+                breathing: '呼吸', tasks: '任务', notes: '快速笔记',
+                kanban: '看板', analytics: '分析', expenses: '支出',
+                sleep: '睡眠', mood: '心情', habits: '习惯',
+                links: '快速链接', shopping: '购物清单', reading: '阅读清单', clock: '世界时钟'
+            },
+            pl: {
+                greeting: (h) => h < 12 ? 'Dzień dobry' : h < 18 ? 'Dzień dobry' : 'Dobry wieczór',
+                settings: 'Ustawienia', availableWidgets: 'Dostępne Widgety',
+                personalization: 'Personalizacja', yourName: 'Twoje imię', save: 'Zapisz Zmiany',
+                noWidgets: 'Brak aktywnych widgetów', addWidgets: 'Dodaj Widgety',
+                customColors: 'Niestandardowe Kolory', primaryColor: 'Kolor Podstawowy',
+                secondaryColor: 'Kolor Drugorzędny', apply: 'Zastosuj', cancel: 'Anuluj',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Resetuj', clearCompleted: 'Wyczyść zakończone',
+                quote: 'Cytat Dnia', word: 'Słowo Dnia', water: 'Nawodnienie', steps: 'Kroki',
+                pomodoro: 'Pomodoro', calculator: 'Kalkulator', calendar: 'Kalendarz',
+                breathing: 'Oddychanie', tasks: 'Zadania', notes: 'Notatki',
+                kanban: 'Tablica Kanban', analytics: 'Analiza', expenses: 'Wydatki',
+                sleep: 'Sen', mood: 'Nastrój', habits: 'Nawyki',
+                links: 'Szybkie Linki', shopping: 'Lista Zakupów', reading: 'Lista Czytelnicza', clock: 'Zegar Światowy'
+            }
+        };
+
+        function dashboardApp() {
+            return {
+                currentLang: localStorage.getItem('lang') || 'es',
+                currentTheme: localStorage.getItem('theme') || 'dark',
+                userName: localStorage.getItem('userName') || 'Usuario',
+                showSettings: false,
+                showLangMenu: false,
+                showColorPicker: false,
+                currentDate: '',
+                currentTime: '',
+                customColors: { primary: '#6366f1', secondary: '#ec4899', accent: '#8b5cf6' },
+                colorPresets: ['#6366f1','#ec4899','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#14b8a6'],
+                flags: { es:'🇪🇸', en:'🇬🇧', de:'🇩🇪', zh:'🇨🇳', pl:'🇵🇱' },
+                langNames: { es:'Español', en:'English', de:'Deutsch', zh:'中文', pl:'Polski' },
+                availableWidgets: [
+                    { id:'quote', name:'Cita del Día', description:'Inspiración diaria', size:'normal' },
+                    { id:'word', name:'Palabra del Día', description:'Aprende vocabulario', size:'normal' },
+                    { id:'water', name:'Hidratación', description:'Seguimiento de agua', size:'normal' },
+                    { id:'steps', name:'Pasos', description:'Contador de pasos', size:'normal' },
+                    { id:'pomodoro', name:'Pomodoro', description:'Temporizador focus', size:'normal' },
+                    { id:'calculator', name:'Calculadora', description:'Calculadora rápida', size:'normal' },
+                    { id:'calendar', name:'Calendario', description:'Calendario mensual', size:'normal' },
+                    { id:'breathing', name:'Respiración', description:'Ejercicios de respiración', size:'normal' },
+                    { id:'tasks', name:'Tareas', description:'Lista de tareas', size:'normal', tall:true },
+                    { id:'notes', name:'Notas Rápidas', description:'Bloc de notas', size:'normal', tall:true },
+                    { id:'kanban', name:'Kanban Board', description:'Tablero de tareas', size:'large', tall:true },
+                    { id:'analytics', name:'Análisis', description:'Gráficos de productividad', size:'large' },
+                    { id:'expenses', name:'Gastos', description:'Control de gastos', size:'normal' },
+                    { id:'sleep', name:'Sueño', description:'Análisis de sueño', size:'large', tall:true },
+                    { id:'mood', name:'Estado de Ánimo', description:'Tracker de humor', size:'large' },
+                    { id:'habits', name:'Hábitos', description:'Seguimiento de hábitos', size:'large' },
+                    { id:'links', name:'Accesos Rápidos', description:'Links favoritos', size:'large' },
+                    { id:'shopping', name:'Lista de Compras', description:'Lista de compras', size:'normal', tall:true },
+                    { id:'reading', name:'Lectura', description:'Lista de lectura', size:'normal', tall:true },
+                    { id:'clock', name:'Reloj Mundial', description:'Horarios globales', size:'large' }
+                ],
+                activeWidgets: [],
+                widgetData: {},
+
+                initApp() {
+                    const savedWidgets = localStorage.getItem('activeWidgets');
+                    if (savedWidgets) {
+                        this.activeWidgets = JSON.parse(savedWidgets);
+                    } else {
+                        this.activeWidgets = [
+                            { id:'quote', size:'normal' },
+                            { id:'tasks', size:'normal', tall:true },
+                            { id:'kanban', size:'large', tall:true },
+                            { id:'analytics', size:'large' },
+                            { id:'pomodoro', size:'normal' },
+                            { id:'clock', size:'large' }
+                        ];
+                    }
+                    const savedWidgetData = localStorage.getItem('widgetData');
+                    if (savedWidgetData) this.widgetData = JSON.parse(savedWidgetData);
+                    window._widgetDataCache = Object.assign({}, this.widgetData);
+
+                    const savedColors = localStorage.getItem('customColors');
+                    if (savedColors) this.customColors = JSON.parse(savedColors);
+
+                    this.$watch('userName', v => localStorage.setItem('userName', v));
+                    this.$watch('customColors', v => {
+                        localStorage.setItem('customColors', JSON.stringify(v));
+                        if (this.currentTheme === 'custom') {
+                            document.documentElement.style.setProperty('--custom-primary', v.primary);
+                            document.documentElement.style.setProperty('--custom-secondary', v.secondary);
+                        }
+                    }, { deep: true });
+                    this.$watch('activeWidgets', () => this.saveWidgets(), { deep: true });
+
+                    window._saveWidgetData = (id, data) => this.saveWidgetData(id, data);
+                    this._setupRebuildHelper();
+                    this.updateDateTime();
+                    setInterval(() => this.updateDateTime(), 1000);
+
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        this.initSortable();
+                        setTimeout(() => this.initCharts(), 100);
+                    });
+
+                    window.previousLang = this.currentLang;
+                },
+
+                saveWidgetData(widgetId, data) {
+                    if (!window._widgetDataCache) window._widgetDataCache = {};
+                    window._widgetDataCache[widgetId] = data;
+                    localStorage.setItem('widgetData', JSON.stringify(window._widgetDataCache));
+                },
+
+                getWidgetData(widgetId, defaultData) {
+                    const cache = window._widgetDataCache || {};
+                    return (cache[widgetId] !== undefined) ? cache[widgetId] : defaultData;
+                },
+
+                onLanguageChange() {
+                    if (this.currentLang !== window.previousLang) {
+                        this.$nextTick(() => {
+                            setTimeout(() => { lucide.createIcons(); this.reinitCharts(); }, 50);
+                        });
+                        window.previousLang = this.currentLang;
+                    }
+                },
+
+                initSortable() {
+                    const grid = this.$refs.widgetGrid;
+                    if (!grid) return;
+                    Sortable.create(grid, {
+                        animation: 200,
+                        handle: '.drag-handle',
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                        onEnd: (evt) => {
+                            const item = this.activeWidgets.splice(evt.oldIndex, 1)[0];
+                            this.activeWidgets.splice(evt.newIndex, 0, item);
+                            this.saveWidgets();
+                        }
+                    });
+                },
+
+                get t() {
+                    const hour = new Date().getHours();
+                    const trans = translations[this.currentLang];
+                    return { ...trans, greeting: trans.greeting(hour) };
+                },
+
+                changeLang(lang) {
+                    this.currentLang = lang;
+                    localStorage.setItem('lang', lang);
+                    document.documentElement.lang = lang;
+                    this.showLangMenu = false;
+                },
+
+                setTheme(theme) {
+                    this.currentTheme = theme;
+                    localStorage.setItem('theme', theme);
+                    if (theme === 'custom') {
+                        document.documentElement.style.setProperty('--custom-primary', this.customColors.primary);
+                        document.documentElement.style.setProperty('--custom-secondary', this.customColors.secondary);
+                    }
+                    this.$nextTick(() => { setTimeout(() => this.reinitCharts(), 100); });
+                },
+
+                isWidgetActive(id) { return this.activeWidgets.some(w => w.id === id); },
+
+                toggleWidget(id) {
+                    const index = this.activeWidgets.findIndex(w => w.id === id);
+                    if (index > -1) {
+                        this.activeWidgets.splice(index, 1);
+                    } else {
+                        const widget = this.availableWidgets.find(w => w.id === id);
+                        if (widget) this.activeWidgets.push({ id: widget.id, size: widget.size, tall: widget.tall });
+                    }
+                    this.saveWidgets();
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        setTimeout(() => this.initCharts(), 100);
+                    });
+                },
+
+                saveWidgets() { localStorage.setItem('activeWidgets', JSON.stringify(this.activeWidgets)); },
+
+                resetAllData() {
+                    if (confirm('¿Estás seguro de que quieres eliminar todos los datos? Esta acción no se puede deshacer.')) {
+                        localStorage.removeItem('widgetData');
+                        localStorage.removeItem('activeWidgets');
+                        localStorage.removeItem('userName');
+                        localStorage.removeItem('customColors');
+                        this.widgetData = {};
+                        this.activeWidgets = [
+                            { id:'quote', size:'normal' }, { id:'tasks', size:'normal', tall:true },
+                            { id:'kanban', size:'large', tall:true }, { id:'analytics', size:'large' },
+                            { id:'pomodoro', size:'normal' }, { id:'clock', size:'large' }
+                        ];
+                        this.userName = 'Usuario';
+                        this.customColors = { primary:'#6366f1', secondary:'#ec4899', accent:'#8b5cf6' };
+                        this.saveWidgets();
+                        location.reload();
+                    }
+                },
+
+                updateDateTime() {
+                    const now = new Date();
+                    const localeMap = { es:'es-ES', en:'en-US', de:'de-DE', zh:'zh-CN', pl:'pl-PL' };
+                    const locale = localeMap[this.currentLang] || 'es-ES';
+                    this.currentDate = now.toLocaleDateString(locale, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+                    this.currentTime = now.toLocaleTimeString(locale, { hour:'2-digit', minute:'2-digit' });
+                },
+
+                renderWidget(widget) {
+                    const widgets = {
+                        quote: this.quoteTemplate(),
+                        word: this.wordTemplate(),
+                        water: this.waterTemplate(),
+                        steps: this.stepsTemplate(),
+                        pomodoro: this.pomodoroTemplate(),
+                        calculator: this.calculatorTemplate(),
+                        calendar: this.calendarTemplate(),
+                        breathing: this.breathingTemplate(),
+                        tasks: this.tasksTemplate(),
+                        notes: this.notesTemplate(),
+                        kanban: this.kanbanTemplate(),
+                        analytics: this.analyticsTemplate(),
+                        expenses: this.expensesTemplate(),
+                        sleep: this.sleepTemplate(),
+                        mood: this.moodTemplate(),
+                        habits: this.habitsTemplate(),
+                        links: this.linksTemplate(),
+                        shopping: this.shoppingTemplate(),
+                        reading: this.readingTemplate(),
+                        clock: this.clockTemplate()
+                    };
+                    return widgets[widget.id] || '';
+                },
+
+                quoteTemplate() {
+                    const savedQuote = this.getWidgetData('quote', { text:'El éxito es la suma de pequeños esfuerzos repetidos.', author:'Robert Collier' });
+                    return `<div x-data="{quote: ${JSON.stringify(savedQuote).replace(/"/g,'&quot;')}}" x-init="$watch('quote', v => window._saveWidgetData('quote', v))">
+                        <div class="flex items-center gap-2 mb-3 pr-8">
+                            <i data-lucide="quote" class="w-4 h-4 text-yellow-400 opacity-80"></i>
+                            <h3 class="font-semibold text-sm tracking-tight">${this.t.quote}</h3>
+                        </div>
+                        <p class="text-sm opacity-72 italic leading-relaxed font-light" x-text="quote.text"></p>
+                        <p class="text-xs opacity-40 mt-2.5 font-medium" x-text="'— ' + quote.author"></p>
+                    </div>`;
+                },
+
+                wordTemplate() {
+                    const savedWord = this.getWidgetData('word', { word:'Serendipia', meaning:'Hallazgo valioso por casualidad', lang:'ES' });
+                    return `<div x-data="{currentWord: ${JSON.stringify(savedWord).replace(/"/g,'&quot;')}}" x-init="$watch('currentWord', v => window._saveWidgetData('word', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="languages" class="w-4 h-4 text-cyan-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.word}</h3>
+                            </div>
+                            <span class="text-xs bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/20 font-medium" x-text="currentWord.lang"></span>
+                        </div>
+                        <p class="text-xl font-semibold text-cyan-400 tracking-tight" x-text="currentWord.word"></p>
+                        <p class="text-xs opacity-50 mt-1.5 font-light" x-text="currentWord.meaning"></p>
+                    </div>`;
+                },
+
+                waterTemplate() {
+                    const savedGlasses = this.getWidgetData('water', 0);
+                    return `<div x-data="{glasses: ${savedGlasses}}" x-init="$watch('glasses', v => window._saveWidgetData('water', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="droplets" class="w-4 h-4 text-blue-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.water}</h3>
+                            </div>
+                            <span class="text-xs opacity-40 font-mono" x-text="glasses + '/8'"></span>
+                        </div>
+                        <div class="flex justify-center py-2">
+                            <button @click="glasses < 8 ? glasses++ : ''"
+                                    class="w-16 h-16 rounded-full flex items-center justify-center transition-all"
+                                    style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.25);border-top-color:rgba(255,255,255,0.15);box-shadow:0 1px 0 rgba(255,255,255,0.12) inset, 0 4px 12px rgba(59,130,246,0.20)">
+                                <i data-lucide="glass-water" class="w-7 h-7 text-blue-400"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <button @click="glasses = Math.max(0, glasses - 1)"
+                                    class="flex-1 rounded-xl py-1.5 text-xs transition-all"
+                                    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">−</button>
+                            <button @click="glasses = 0"
+                                    class="px-3 rounded-xl text-xs transition-all"
+                                    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                },
+
+                stepsTemplate() {
+                    const savedSteps = this.getWidgetData('steps', 6432);
+                    return `<div x-data="{steps: ${savedSteps}}" x-init="$watch('steps', v => window._saveWidgetData('steps', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="footprints" class="w-4 h-4 text-orange-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.steps}</h3>
+                            </div>
+                            <button @click="steps = 0" class="action-btn reset text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                <span class="hidden sm:inline">${this.t.reset}</span>
+                            </button>
+                        </div>
+                        <div class="text-center py-2">
+                            <p class="text-3xl font-semibold tracking-tighter" x-text="steps.toLocaleString()"></p>
+                            <p class="text-xs opacity-35 mt-1 font-light">Meta: 10,000</p>
+                        </div>
+                        <div class="h-1.5 rounded-full overflow-hidden mt-2" style="background:rgba(255,255,255,0.08)">
+                            <div class="h-full rounded-full transition-all" style="background:linear-gradient(90deg,#fb923c,#ef4444)"
+                                 :style="'width: ' + Math.min(100, steps/100) + '%'"></div>
+                        </div>
+                        <button @click="steps += 500"
+                                class="w-full mt-3 rounded-xl py-1.5 text-xs font-medium transition-all"
+                                style="background:rgba(251,146,60,0.18);border:1px solid rgba(251,146,60,0.25);border-top-color:rgba(255,255,255,0.14)">
+                            + 500
+                        </button>
+                    </div>`;
+                },
+
+                pomodoroTemplate() {
+                    const savedPomodoro = this.getWidgetData('pomodoro', { time:25*60, mode:'work' });
+                    return `<div x-data="{time: ${savedPomodoro.time}, running: false, mode: '${savedPomodoro.mode}'}"
+                         x-init="setInterval(() => { if(running && time > 0) time-- }, 1000); $watch('time', v => window._saveWidgetData('pomodoro', {time: v, mode: mode})); $watch('mode', v => window._saveWidgetData('pomodoro', {time: time, mode: v}))">
+                        <div class="flex items-center justify-between mb-2 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="timer" class="w-4 h-4 text-red-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.pomodoro}</h3>
+                            </div>
+                            <div class="flex gap-1">
+                                <button @click="mode='work'; time=25*60; running=false"
+                                        class="px-2 py-0.5 text-[10px] rounded-lg font-medium transition-all"
+                                        :style="mode === 'work' ? 'background:rgba(239,68,68,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35)' : 'background:rgba(255,255,255,0.08);border:1px solid transparent'">25</button>
+                                <button @click="mode='break'; time=5*60; running=false"
+                                        class="px-2 py-0.5 text-[10px] rounded-lg font-medium transition-all"
+                                        :style="mode === 'break' ? 'background:rgba(34,197,94,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35)' : 'background:rgba(255,255,255,0.08);border:1px solid transparent'">5</button>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-20 h-20">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="40" cy="40" r="32" stroke="rgba(255,255,255,0.07)" stroke-width="4" fill="none"/>
+                                    <circle cx="40" cy="40" r="32" :stroke="mode === 'work' ? '#ef4444' : '#22c55e'"
+                                            stroke-width="4" fill="none" stroke-linecap="round"
+                                            :stroke-dasharray="201"
+                                            :stroke-dashoffset="201 - (201 * (mode === 'work' ? (25*60-time)/(25*60) : (5*60-time)/(5*60)))"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-lg font-mono font-semibold tabular-nums"
+                                          x-text="Math.floor(time/60).toString().padStart(2,'0') + ':' + (time%60).toString().padStart(2,'0')"></span>
+                                </div>
+                            </div>
+                            <button @click="running = !running"
+                                    class="mt-2 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                                    style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);border-top-color:rgba(255,255,255,0.30);box-shadow:0 1px 0 rgba(255,255,255,0.14) inset">
+                                <i :data-lucide="running ? 'pause' : 'play'" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                },
+
+                calculatorTemplate() {
+                    return `<div x-data="{current: '', prev: '', op: null}">
+                        <div class="flex items-center gap-2 mb-2 pr-8">
+                            <i data-lucide="calculator" class="w-4 h-4 opacity-40"></i>
+                            <h3 class="font-semibold text-sm tracking-tight">${this.t.calculator}</h3>
+                        </div>
+                        <div class="rounded-xl p-3 mb-2 text-right" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.04)">
+                            <p class="text-xs opacity-35 font-mono h-4" x-text="prev + (op || '')"></p>
+                            <p class="text-xl font-mono font-semibold" x-text="current || '0'"></p>
+                        </div>
+                        <div class="grid grid-cols-4 gap-1">
+                            <template x-for="btn in ['C','÷','×','⌫','7','8','9','-','4','5','6','+','1','2','3','=']">
+                                <button @click="if(btn==='C'){current='';prev='';op=null}else if(['+','-','×','÷'].includes(btn)){op=btn;prev=current;current=''}else if(btn==='='){if(op && prev){current=eval(prev+op.replace('×','*').replace('÷','/')+current);prev='';op=null}}else if(btn==='⌫'){current=current.slice(0,-1)}else{current+=btn}"
+                                        class="calc-btn h-8 rounded-lg text-xs font-medium transition-all"
+                                        :style="btn === '=' ? 'background:rgba(139,92,246,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35);box-shadow:0 1px 0 rgba(255,255,255,0.16) inset' : 'background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)'"
+                                        x-text="btn"></button>
+                            </template>
+                            <button @click="current+='0'" class="calc-btn h-8 rounded-lg text-xs col-span-2" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)">0</button>
+                            <button @click="current+='.'" class="calc-btn h-8 rounded-lg text-xs" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06)">.</button>
+                            <button @click="if(op && prev){current=eval(prev+op.replace('×','*').replace('÷','/')+current);prev='';op=null}"
+                                    class="calc-btn h-8 rounded-lg text-xs" style="background:rgba(139,92,246,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35)">=</button>
+                        </div>
+                    </div>`;
+                },
+
+                calendarTemplate() {
+                    return `<div x-data="{date: new Date(), selected: null}">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar-days" class="w-4 h-4 text-violet-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight" x-text="date.toLocaleDateString('${this.currentLang === 'zh' ? 'zh-CN' : this.currentLang === 'de' ? 'de-DE' : this.currentLang === 'en' ? 'en-US' : this.currentLang === 'pl' ? 'pl-PL' : 'es-ES'}', {month:'long', year:'numeric'})"></h3>
+                            </div>
+                            <div class="flex gap-1">
+                                <button @click="date = new Date(date.getFullYear(), date.getMonth()-1, 1)" class="p-1 rounded-lg hover:bg-white/08 transition-all"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                                <button @click="date = new Date(date.getFullYear(), date.getMonth()+1, 1)" class="p-1 rounded-lg hover:bg-white/08 transition-all"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] opacity-35 mb-1 tracking-wider uppercase font-medium">
+                            <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                            <template x-for="d in Array.from({length: new Date(date.getFullYear(), date.getMonth()+1, 0).getDate()}, (_,i) => i+1)">
+                                <button class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium transition-all"
+                                        :class="d === new Date().getDate() && date.getMonth() === new Date().getMonth() ? 'text-white' : 'hover:bg-white/08 opacity-60'"
+                                        :style="d === new Date().getDate() && date.getMonth() === new Date().getMonth() ? 'background:rgba(139,92,246,0.70);box-shadow:0 1px 0 rgba(255,255,255,0.20) inset,0 2px 8px rgba(139,92,246,0.30)' : ''"
+                                        x-text="d"></button>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                breathingTemplate() {
+                    const inhale = this.currentLang==='es'?'Inhala...':this.currentLang==='en'?'Inhale...':this.currentLang==='de'?'Einatmen...':this.currentLang==='zh'?'吸气...':'Wdech...';
+                    const exhale = this.currentLang==='es'?'Exhala...':this.currentLang==='en'?'Exhale...':this.currentLang==='de'?'Ausatmen...':this.currentLang==='zh'?'呼气...':'Wydech...';
+                    const start  = this.currentLang==='es'?'Iniciar':this.currentLang==='en'?'Start':this.currentLang==='de'?'Start':this.currentLang==='zh'?'开始':'Start';
+                    const stop   = this.currentLang==='es'?'Detener':this.currentLang==='en'?'Stop':this.currentLang==='de'?'Stop':this.currentLang==='zh'?'停止':'Stop';
+                    return `<div x-data="{phase: false, running: false, _timer: null}"
+                         x-init="$watch('running', v => { clearInterval(_timer); if(v){ phase=false; _timer=setInterval(()=>{ phase=!phase }, 4000) } else { phase=false } })">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="wind" class="w-4 h-4 text-teal-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.breathing}</h3>
+                            </div>
+                            <button @click="running = !running"
+                                    class="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-medium transition-all"
+                                    :style="running ? 'background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.25);color:#f87171' : 'background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.25);color:#2dd4bf'">
+                                <i :data-lucide="running ? 'square' : 'play'" class="w-3 h-3"></i>
+                                <span x-text="running ? '${stop}' : '${start}'"></span>
+                            </button>
+                        </div>
+                        <div class="flex flex-col items-center py-2">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all"
+                                 :class="running ? (phase ? 'scale-125 duration-[4000ms]' : 'scale-100 duration-[4000ms]') : 'scale-100'"
+                                 :style="running ? 'background:linear-gradient(135deg,rgba(45,212,191,0.40),rgba(56,189,248,0.35));border:1px solid rgba(255,255,255,0.18);border-top-color:rgba(255,255,255,0.35);box-shadow:0 1px 0 rgba(255,255,255,0.16) inset,0 8px 32px rgba(45,212,191,0.20)' : 'background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)'">
+                                <i data-lucide="flower-2" class="w-7 h-7 text-teal-300" :class="running ? '' : 'opacity-30'"></i>
+                            </div>
+                            <p class="text-sm font-medium mt-3 transition-all tracking-wide"
+                               :class="running ? 'opacity-80' : 'opacity-25'"
+                               x-text="running ? (phase ? '${exhale}' : '${inhale}') : '— —'"></p>
+                        </div>
+                    </div>`;
+                },
+
+                tasksTemplate() {
+                    const savedTasks = this.getWidgetData('tasks', [{text:'Revisar correos',done:true},{text:'Completar reporte',done:false}]);
+                    return `<div x-data="{tasks: ${JSON.stringify(savedTasks).replace(/"/g,'&quot;')}, newTask: ''}"
+                         x-init="$watch('tasks', v => window._saveWidgetData('tasks', v))">
+                        <div class="flex items-center justify-between mb-4 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.tasks}</h3>
+                            </div>
+                            <span class="text-xs opacity-35 font-mono" x-text="tasks.filter(t=>t.done).length + '/' + tasks.length"></span>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" x-model="newTask" @keydown.enter="if(newTask.trim()){tasks.push({text:newTask,done:false});newTask=''}"
+                                   placeholder="${this.currentLang==='es'?'Nueva tarea...':this.currentLang==='en'?'New task...':this.currentLang==='de'?'Neue Aufgabe...':this.currentLang==='zh'?'新任务...':'Nowe zadanie...'}"
+                                   class="glass-input flex-1 px-3 py-2 text-sm placeholder-white/25">
+                            <button @click="if(newTask.trim()){tasks.push({text:newTask,done:false});newTask=''}"
+                                    class="rounded-xl px-3 py-2 transition-all"
+                                    style="background:rgba(34,197,94,0.22);border:1px solid rgba(34,197,94,0.30);border-top-color:rgba(255,255,255,0.18)">
+                                <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                            <template x-for="(task, i) in tasks" :key="i">
+                                <div class="flex items-center gap-2 p-2 rounded-xl transition-all"
+                                     :style="task.done ? 'opacity:0.45' : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.10)'">
+                                    <button @click="task.done = !task.done"
+                                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                                            :style="task.done ? 'background:rgba(34,197,94,0.70);border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,0.20) inset' : 'border-color:rgba(255,255,255,0.25)'">
+                                        <i data-lucide="check" class="w-2.5 h-2.5 text-white" x-show="task.done"></i>
+                                    </button>
+                                    <span class="flex-1 text-sm font-light" :class="{'line-through opacity-50': task.done}" x-text="task.text"></span>
+                                    <button @click="tasks.splice(i,1)" class="action-btn delete w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                notesTemplate() {
+                    const savedNote = localStorage.getItem('widget_note') || '';
+                    return `<div x-data="{note: '${savedNote.replace(/'/g,"\\'")}', saved: false}"
+                         x-init="$watch('note', v => { localStorage.setItem('widget_note', v); saved=true; setTimeout(()=>saved=false, 1000) })">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="sticky-note" class="w-4 h-4 text-amber-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.notes}</h3>
+                            </div>
+                            <span class="text-xs text-emerald-400 font-medium" x-show="saved">✓ Saved</span>
+                        </div>
+                        <textarea x-model="note"
+                                  placeholder="${this.currentLang==='es'?'Escribe aquí...':this.currentLang==='en'?'Write here...':this.currentLang==='de'?'Hier schreiben...':this.currentLang==='zh'?'在这里写...':'Napisz tutaj...'}"
+                                  class="glass-input w-full h-40 p-3 text-sm resize-none font-light leading-relaxed placeholder-white/20"></textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs opacity-25 font-mono" x-text="note.length + ' chars'"></span>
+                            <button @click="note='';localStorage.removeItem('widget_note')" class="text-xs opacity-40 hover:text-red-400 hover:opacity-100 flex items-center gap-1 transition-all">
+                                <i data-lucide="trash" class="w-3 h-3"></i>
+                                ${this.currentLang==='es'?'Limpiar':this.currentLang==='en'?'Clear':this.currentLang==='de'?'Löschen':this.currentLang==='zh'?'清除':'Wyczyść'}
+                            </button>
+                        </div>
+                    </div>`;
+                },
+
+                kanbanTemplate() {
+                    const savedKanban = this.getWidgetData('kanban', { todo:['Diseñar logo','Revisar código'], doing:['Dashboard UI'], done:['Setup'] });
+                    const colNames = {
+                        todo: this.currentLang==='es'?'Por Hacer':this.currentLang==='en'?'To Do':this.currentLang==='de'?'Zu Tun':this.currentLang==='zh'?'待办':'Do Zrobienia',
+                        doing: this.currentLang==='es'?'En Progreso':this.currentLang==='en'?'In Progress':this.currentLang==='de'?'In Bearbeitung':this.currentLang==='zh'?'进行中':'W Trakcie',
+                        done: this.currentLang==='es'?'Hecho':this.currentLang==='en'?'Done':this.currentLang==='de'?'Fertig':this.currentLang==='zh'?'已完成':'Zrobione'
+                    };
+                    return `<div x-data="{cols: {todo: ${JSON.stringify(savedKanban.todo).replace(/"/g,'&quot;')}, doing: ${JSON.stringify(savedKanban.doing).replace(/"/g,'&quot;')}, done: ${JSON.stringify(savedKanban.done).replace(/"/g,'&quot;')}}, newTask: ''}"
+                         x-init="$watch('cols', v => window._saveWidgetData('kanban', v))">
+                        <div class="flex items-center justify-between mb-4 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="layout" class="w-4 h-4 text-indigo-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.kanban}</h3>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 h-48">
+                            <template x-for="(col, key) in [{name: '${colNames.todo}', key: 'todo'}, {name: '${colNames.doing}', key: 'doing'}, {name: '${colNames.done}', key: 'done'}]">
+                                <div class="rounded-2xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-top-color:rgba(255,255,255,0.12)">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-[10px] font-semibold tracking-wider uppercase opacity-50" x-text="col.name"></span>
+                                        <span class="text-[9px] bg-white/10 px-1.5 py-0.5 rounded-full font-mono" x-text="cols[col.key].length"></span>
+                                    </div>
+                                    <div class="space-y-1 overflow-y-auto max-h-28">
+                                        <template x-for="(task, ti) in cols[col.key]">
+                                            <div class="rounded-lg p-1.5 text-xs flex items-center justify-between group"
+                                                 style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.08)">
+                                                <span x-text="task" class="font-light"></span>
+                                                <button @click="cols[col.key].splice(ti, 1)" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-opacity">
+                                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <input type="text" x-model="newTask"
+                                           @keydown.enter="if(newTask.trim()){cols[col.key].push(newTask);newTask=''}"
+                                           class="w-full mt-1 bg-transparent text-xs placeholder-white/20 focus:outline-none font-light"
+                                           placeholder="+">
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                analyticsTemplate() {
+                    const chartId = 'chart-analytics-main';
+                    const savedAnalytics = this.getWidgetData('analytics', { data:[null,null,null,null,null,null,null], type:'bar' });
+                    const dayLabels = { es:['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'], en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], de:['Mo','Di','Mi','Do','Fr','Sa','So'], zh:['一','二','三','四','五','六','日'], pl:['Pn','Wt','Śr','Cz','Pt','So','Nd'] };
+                    const labels = JSON.stringify(dayLabels[this.currentLang] || dayLabels.es);
+                    const statLabels = {
+                        avg: this.currentLang==='es'?'Promedio':this.currentLang==='en'?'Average':this.currentLang==='de'?'Durchschn.':this.currentLang==='zh'?'平均':'Śr.',
+                        best: this.currentLang==='es'?'Mejor':this.currentLang==='en'?'Best':this.currentLang==='de'?'Beste':this.currentLang==='zh'?'最佳':'Najl.',
+                        goodDays: this.currentLang==='es'?'Días≥7':this.currentLang==='en'?'Days≥7':this.currentLang==='de'?'Tage≥7':this.currentLang==='zh'?'天≥7':'Dni≥7',
+                        today: this.currentLang==='es'?'Productividad de hoy (1-10)':this.currentLang==='en'?"Today's productivity (1-10)":this.currentLang==='de'?'Heutige Produktivität (1-10)':this.currentLang==='zh'?'今日生产力(1-10)':'Produktywność dziś (1-10)',
+                        log: this.currentLang==='es'?'Registrar':this.currentLang==='en'?'Log':this.currentLang==='de'?'Eintragen':this.currentLang==='zh'?'记录':'Zapisz'
+                    };
+                    return `<div x-data="{
+                            chartData: ${JSON.stringify(savedAnalytics.data)},
+                            chartType: '${savedAnalytics.type||'bar'}',
+                            todayScore: 7,
+                            showInput: false,
+                            get avg(){ var d=this.chartData.filter(v=>v!==null&&v!==undefined); return d.length?(d.reduce((a,b)=>a+b,0)/d.length).toFixed(1):'-'; },
+                            get best(){ var d=this.chartData.filter(v=>v!==null&&v!==undefined); return d.length?Math.max(...d):'-'; },
+                            get goodDays(){ return this.chartData.filter(v=>v!==null&&v!==undefined&&v>=7).length; },
+                            saveAndUpdate(){
+                                window._saveWidgetData('analytics',{data:this.chartData,type:this.chartType});
+                                var c=window.chartInstances['${chartId}'];
+                                if(c){c.data.datasets[0].data=[...this.chartData];c.update();}
+                            },
+                            logToday(){
+                                var idx=this.chartData.indexOf(null);
+                                if(idx!==-1){ var nd=[...this.chartData]; nd[idx]=parseInt(this.todayScore)||7; this.chartData=nd; }
+                                else { this.chartData=[...this.chartData.slice(1),parseInt(this.todayScore)||7]; }
+                                this.saveAndUpdate(); this.showInput=false;
+                            },
+                            toggleType(){
+                                this.chartType=this.chartType==='bar'?'line':'bar';
+                                window._saveWidgetData('analytics',{data:this.chartData,type:this.chartType});
+                                var c=window.chartInstances['${chartId}'];
+                                if(c){ c.destroy(); delete window.chartInstances['${chartId}']; }
+                                window._rebuildAnalyticsChart('${chartId}', this.chartData, this.chartType);
+                            },
+                            resetData(){ this.chartData=[null,null,null,null,null,null,null]; this.saveAndUpdate(); }
+                        }">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="bar-chart-3" class="w-4 h-4 text-violet-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.analytics}</h3>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button @click="toggleType()" class="action-btn text-xs px-2 py-1 rounded-lg text-violet-400">
+                                    <i :data-lucide="chartType==='bar'?'trending-up':'bar-chart-2'" class="w-3 h-3"></i>
+                                </button>
+                                <button @click="showInput=!showInput" class="action-btn text-xs flex items-center gap-1 px-2 py-1 rounded-lg text-violet-400">
+                                    <i :data-lucide="showInput?'minus':'plus'" class="w-3 h-3"></i>
+                                    <span class="hidden sm:inline text-xs">${statLabels.log}</span>
+                                </button>
+                                <button @click="resetData()" class="action-btn reset text-xs px-2 py-1 rounded-lg">
+                                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div x-show="showInput" x-transition class="mb-3 p-3 rounded-xl" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <p class="text-[10px] opacity-40 uppercase tracking-widest mb-2">${statLabels.today}</p>
+                            <div class="flex items-center gap-2">
+                                <input type="range" min="1" max="10" x-model.number="todayScore" class="flex-1 accent-violet-500 cursor-pointer">
+                                <span class="text-sm font-bold w-6 text-center text-violet-400 font-mono" x-text="todayScore"></span>
+                                <button @click="logToday()" class="rounded-xl px-3 py-1.5 text-xs transition-all" style="background:rgba(139,92,246,0.35);border:1px solid rgba(139,92,246,0.40)">OK</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-violet-400 font-mono" x-text="avg"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${statLabels.avg}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-emerald-400 font-mono" x-text="best"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${statLabels.best}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-blue-400 font-mono" x-text="goodDays"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${statLabels.goodDays}</p>
+                            </div>
+                        </div>
+                        <div class="h-28"><canvas id="${chartId}" data-chart-id="${chartId}" data-labels="${labels.replace(/"/g,'&quot;')}"></canvas></div>
+                    </div>`;
+                },
+
+                expensesTemplate() {
+                    const savedExpenses = this.getWidgetData('expenses', [{amt:12.5,cat:'Comida'},{amt:25,cat:'Transporte'}]);
+                    return `<div x-data="{expenses: ${JSON.stringify(savedExpenses).replace(/"/g,'&quot;')}, newAmt: '', newCat: 'Comida'}"
+                         x-init="$watch('expenses', v => window._saveWidgetData('expenses', v))">
+                        <div class="flex items-center gap-2 mb-3 pr-8">
+                            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+                            <h3 class="font-semibold text-sm tracking-tight">${this.t.expenses}</h3>
+                        </div>
+                        <p class="text-2xl font-semibold tracking-tighter" x-text="'$' + expenses.reduce((a,b)=>a+b.amt,0).toFixed(2)"></p>
+                        <div class="flex gap-2 mt-3">
+                            <input type="number" x-model="newAmt" placeholder="0.00" class="glass-input w-16 px-2 py-1 text-xs">
+                            <select x-model="newCat" class="glass-input flex-1 px-2 py-1 text-xs">
+                                <option>Comida</option><option>Transporte</option><option>Otros</option>
+                            </select>
+                            <button @click="if(newAmt){expenses.push({amt:parseFloat(newAmt),cat:newCat});newAmt=''}"
+                                    class="rounded-xl px-2 transition-all"
+                                    style="background:rgba(34,197,94,0.22);border:1px solid rgba(34,197,94,0.30);border-top-color:rgba(255,255,255,0.18)">
+                                <i data-lucide="plus" class="w-3 h-3 text-emerald-400"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2 space-y-1 max-h-20 overflow-y-auto">
+                            <template x-for="(exp, i) in expenses" :key="i">
+                                <div class="flex justify-between items-center text-xs p-1.5 rounded-lg hover:bg-white/04 transition-all">
+                                    <span class="opacity-50 font-light" x-text="exp.cat"></span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono" x-text="'$' + exp.amt.toFixed(2)"></span>
+                                        <button @click="expenses.splice(i, 1)" class="text-red-400/60 hover:text-red-400 transition-colors">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                sleepTemplate() {
+                    const defaultSleep = { log:[], bedtime:'23:00', waketime:'06:30' };
+                    const raw = this.getWidgetData('sleep', defaultSleep);
+                    const sleepData = (typeof raw === 'number')
+                        ? { log:[{h:raw,q:3,d:new Date().toLocaleDateString()}], bedtime:'23:00', waketime:'06:30' }
+                        : (raw && raw.log ? raw : defaultSleep);
+                    const tx = {
+                        title: this.currentLang==='es'?'Análisis de Sueño':this.currentLang==='en'?'Sleep Analysis':this.currentLang==='de'?'Schlafanalyse':this.currentLang==='zh'?'睡眠分析':'Analiza snu',
+                        lastNight: this.currentLang==='es'?'Anoche':this.currentLang==='en'?'Last night':this.currentLang==='de'?'Letzte Nacht':this.currentLang==='zh'?'昨晚':'Wczoraj',
+                        avg: this.currentLang==='es'?'Promedio':this.currentLang==='en'?'Average':this.currentLang==='de'?'Durchschn.':this.currentLang==='zh'?'平均':'Śr.',
+                        best: this.currentLang==='es'?'Mejor':this.currentLang==='en'?'Best':this.currentLang==='de'?'Beste':this.currentLang==='zh'?'最佳':'Najl.',
+                        streak: this.currentLang==='es'?'Racha':this.currentLang==='en'?'Streak':this.currentLang==='de'?'Serie':this.currentLang==='zh'?'连续':'Seria',
+                        quality: this.currentLang==='es'?'Calidad':this.currentLang==='en'?'Quality':this.currentLang==='de'?'Qualität':this.currentLang==='zh'?'质量':'Jakość',
+                        bedtime: this.currentLang==='es'?'Dormir':this.currentLang==='en'?'Bedtime':this.currentLang==='de'?'Schlafzeit':this.currentLang==='zh'?'睡觉':'Spanie',
+                        wakeup: this.currentLang==='es'?'Despertar':this.currentLang==='en'?'Wake up':this.currentLang==='de'?'Aufwachen':this.currentLang==='zh'?'起床':'Wstanie',
+                        log: this.currentLang==='es'?'Registrar':this.currentLang==='en'?'Log':this.currentLang==='de'?'Eintragen':this.currentLang==='zh'?'记录':'Zapisz',
+                        noData: this.currentLang==='es'?'Sin registros aún':this.currentLang==='en'?'No records yet':this.currentLang==='de'?'Keine Einträge':this.currentLang==='zh'?'暂无记录':'Brak danych',
+                        hours: this.currentLang==='es'?'Horas dormidas':this.currentLang==='en'?'Hours slept':this.currentLang==='de'?'Geschlafene Stunden':this.currentLang==='zh'?'睡眠时间':'Godziny snu',
+                        poor: this.currentLang==='es'?'Malo':this.currentLang==='en'?'Poor':this.currentLang==='de'?'Schlecht':this.currentLang==='zh'?'差':'Słabo',
+                        ok: this.currentLang==='es'?'Regular':this.currentLang==='en'?'Fair':this.currentLang==='de'?'Mäßig':this.currentLang==='zh'?'一般':'Przeciętnie',
+                        good: this.currentLang==='es'?'Bueno':this.currentLang==='en'?'Good':this.currentLang==='de'?'Gut':this.currentLang==='zh'?'好':'Dobrze',
+                        great: this.currentLang==='es'?'Muy bueno':this.currentLang==='en'?'Great':this.currentLang==='de'?'Super':this.currentLang==='zh'?'很好':'Świetnie',
+                        excellent: this.currentLang==='es'?'Excelente':this.currentLang==='en'?'Excellent':this.currentLang==='de'?'Ausgezeichnet':this.currentLang==='zh'?'极好':'Doskonale'
+                    };
+                    return `<div x-data="{
+                            log: ${JSON.stringify(sleepData.log).replace(/"/g,'&quot;')},
+                            bedtime: '${sleepData.bedtime}', waketime: '${sleepData.waketime}',
+                            newHours: '', newQuality: 3, showAdd: false,
+                            get last(){ return this.log.length?this.log[this.log.length-1]:null; },
+                            get avg(){ var d=this.log.filter(e=>e.h); return d.length?(d.reduce((a,b)=>a+b.h,0)/d.length).toFixed(1):'-'; },
+                            get best(){ var d=this.log.filter(e=>e.h); return d.length?Math.max(...d.map(e=>e.h)):'-'; },
+                            get streak(){ var s=0,arr=[...this.log].reverse(); for(var e of arr){if(e.h>=7)s++;else break;} return s; },
+                            hColor(h){ return h>=8?'#22c55e':h>=7?'#3b82f6':h>=6?'#eab308':'#ef4444'; },
+                            hLabel(h){ return h>=8?'${tx.excellent}':h>=7?'${tx.great}':h>=6?'${tx.good}':h>=5?'${tx.ok}':'${tx.poor}'; },
+                            qEmoji(q){ return ['😴','😐','🙂','😊','⭐'][q-1]||'😐'; },
+                            barH(h){ return Math.min(Math.round((h/10)*100),100); },
+                            saveAll(){ window._saveWidgetData('sleep',{log:this.log,bedtime:this.bedtime,waketime:this.waketime}); },
+                            addLog(){
+                                var h=parseFloat(this.newHours);
+                                if(!h||h<=0||h>24)return;
+                                var now=new Date();
+                                var d=now.toLocaleDateString('${this.currentLang==='zh'?'zh-CN':this.currentLang==='de'?'de-DE':this.currentLang==='pl'?'pl-PL':this.currentLang==='en'?'en-US':'es-ES'}',{day:'2-digit',month:'short'});
+                                this.log=[...this.log.slice(-6),{h:h,q:this.newQuality,d:d}];
+                                this.newHours=''; this.showAdd=false; this.saveAll();
+                            },
+                            calcFromTimes(){
+                                if(!this.bedtime||!this.waketime)return;
+                                var [bh,bm]=this.bedtime.split(':').map(Number);
+                                var [wh,wm]=this.waketime.split(':').map(Number);
+                                var mins=(wh*60+wm)-(bh*60+bm);
+                                if(mins<0)mins+=1440;
+                                this.newHours=(mins/60).toFixed(1);
+                            }
+                        }" x-init="saveAll">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${tx.title}</h3>
+                            </div>
+                            <button @click="showAdd=!showAdd" class="action-btn text-indigo-400 flex items-center gap-1 px-2 py-1 rounded-lg text-xs">
+                                <i :data-lucide="showAdd?'minus':'plus'" class="w-3 h-3"></i>
+                                <span>${tx.log}</span>
+                            </button>
+                        </div>
+                        <template x-if="last">
+                            <div class="flex items-center justify-between mb-3 p-3 rounded-2xl" :style="'background:'+hColor(last.h)+'18;border:1px solid '+hColor(last.h)+'35'">
+                                <div>
+                                    <p class="text-2xl font-semibold tracking-tighter font-mono" :style="'color:'+hColor(last.h)" x-text="last.h+'h'"></p>
+                                    <p class="text-[10px] opacity-45 font-light">${tx.lastNight} • <span x-text="last.d"></span></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xl" x-text="qEmoji(last.q)"></p>
+                                    <p class="text-[10px] font-medium" :style="'color:'+hColor(last.h)" x-text="hLabel(last.h)"></p>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!last">
+                            <div class="text-center py-3 opacity-30">
+                                <i data-lucide="moon" class="w-8 h-8 mx-auto mb-1"></i>
+                                <p class="text-xs font-light">${tx.noData}</p>
+                            </div>
+                        </template>
+                        <div x-show="showAdd" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.bedtime}</p>
+                                    <input type="time" x-model="bedtime" @change="calcFromTimes()" class="glass-input w-full px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.wakeup}</p>
+                                    <input type="time" x-model="waketime" @change="calcFromTimes()" class="glass-input w-full px-2 py-1 text-xs">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1">
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.hours}</p>
+                                    <input type="number" x-model="newHours" step="0.5" min="0" max="24" placeholder="7.5" class="glass-input w-full px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.quality}</p>
+                                    <div class="flex gap-1">
+                                        <template x-for="q in [1,2,3,4,5]" :key="q">
+                                            <button @click="newQuality=q" class="text-base transition-all" :style="newQuality===q?'transform:scale(1.3)':'opacity:0.4'" x-text="qEmoji(q)"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            <button @click="addLog()" :disabled="!newHours" class="w-full py-1.5 rounded-xl text-xs font-medium transition-all disabled:opacity-30" style="background:rgba(99,102,241,0.35);border:1px solid rgba(99,102,241,0.40);border-top-color:rgba(255,255,255,0.20)">${tx.log}</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-indigo-400 font-mono" x-text="avg+'h'"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${tx.avg}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-emerald-400 font-mono" x-text="best!=='-'?best+'h':'-'"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${tx.best}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-violet-400 font-mono" x-text="streak"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${tx.streak}</p>
+                            </div>
+                        </div>
+                        <template x-if="log.length > 0">
+                            <div>
+                                <div class="flex items-end justify-between gap-1 h-14">
+                                    <template x-for="(entry, i) in log.slice(-7)" :key="i">
+                                        <div class="flex-1 flex flex-col items-center gap-0.5">
+                                            <div class="w-full rounded-t transition-all" :style="'height:'+barH(entry.h)+'%;background:'+hColor(entry.h)+'90;min-height:4px;border-radius:4px 4px 2px 2px'" :title="entry.h+'h'"></div>
+                                            <span class="text-[8px] opacity-30 font-mono" x-text="entry.d.split('/')[0]||entry.d.substring(0,3)"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>`;
+                },
+
+                moodTemplate() {
+                    const savedMood = this.getWidgetData('mood', null);
+                    return `<div x-data="{mood: ${savedMood===null?'null':savedMood}, moods: [{v:1,e:'😢'},{v:2,e:'😕'},{v:3,e:'😐'},{v:4,e:'🙂'},{v:5,e:'😄'}]}"
+                         x-init="$watch('mood', v => window._saveWidgetData('mood', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="smile" class="w-4 h-4 text-pink-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.mood}</h3>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-4 py-3">
+                            <template x-for="m in moods">
+                                <button @click="mood = m.v"
+                                        class="text-3xl transition-all hover:scale-125"
+                                        :class="mood === m.v ? 'scale-125' : 'opacity-40'"
+                                        :style="mood === m.v ? 'filter:drop-shadow(0 0 12px rgba(255,150,200,0.6))' : ''"
+                                        x-text="m.e"></button>
+                            </template>
+                        </div>
+                        <div class="flex gap-1.5 justify-center mt-3">
+                            <template x-for="i in 7">
+                                <div class="w-6 h-1.5 rounded-full" style="background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.06)"></div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                habitsTemplate() {
+                    const habitNames = {
+                        meditate: this.currentLang==='es'?'Meditar':this.currentLang==='en'?'Meditate':this.currentLang==='de'?'Meditieren':this.currentLang==='zh'?'冥想':'Medytacja',
+                        exercise: this.currentLang==='es'?'Ejercicio':this.currentLang==='en'?'Exercise':this.currentLang==='de'?'Sport':this.currentLang==='zh'?'锻炼':'Ćwiczenia',
+                        read: this.currentLang==='es'?'Leer':this.currentLang==='en'?'Read':this.currentLang==='de'?'Lesen':this.currentLang==='zh'?'阅读':'Czytanie'
+                    };
+                    const savedHabits = this.getWidgetData('habits', [
+                        {n:habitNames.meditate,p:60,c:'#a855f7',i:'brain'},
+                        {n:habitNames.exercise,p:40,c:'#f97316',i:'dumbbell'},
+                        {n:habitNames.read,p:80,c:'#3b82f6',i:'book-open'}
+                    ]);
+                    return `<div x-data="{habits: ${JSON.stringify(savedHabits).replace(/"/g,'&quot;')}}" x-init="$watch('habits', v => window._saveWidgetData('habits', v))">
+                        <div class="flex items-center justify-between mb-4 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="target" class="w-4 h-4 text-rose-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.habits}</h3>
+                            </div>
+                            <button @click="habits.forEach(h => h.p = 0)" class="action-btn reset text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                <span class="hidden sm:inline">${this.t.reset}</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <template x-for="(h,i) in habits">
+                                <div class="flex flex-col items-center cursor-pointer" @click="h.p = Math.min(100, h.p + 20)">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-full h-full transform -rotate-90">
+                                            <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.07)" stroke-width="4" fill="none"/>
+                                            <circle cx="32" cy="32" r="28" :stroke="h.c" stroke-width="4" fill="none" stroke-linecap="round"
+                                                    :stroke-dasharray="175" :stroke-dashoffset="175 - (175 * h.p / 100)"/>
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <i :data-lucide="h.i" class="w-4 h-4" :style="'color:'+h.c"></i>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs mt-1.5 text-center font-light" x-text="h.n"></span>
+                                    <span class="text-[10px] opacity-35 font-mono" x-text="h.p + '%'"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                linksTemplate() {
+                    const savedLinks = this.getWidgetData('links', [
+                        {n:'GitHub',u:'https://github.com',i:'github',bg:'#24292e'},
+                        {n:'Gmail',u:'https://gmail.com',i:'mail',bg:'#ea4335'},
+                        {n:'Notion',u:'https://notion.so',i:'file-text',bg:'#2d2d2d'}
+                    ]);
+                    return `<div x-data="{links: ${JSON.stringify(savedLinks).replace(/"/g,'&quot;')}, showAdd: false, newName: '', newUrl: '', newIcon: 'link', newColor: '#6366f1', editMode: false}" x-init="$watch('links', v => window._saveWidgetData('links', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="link" class="w-4 h-4 text-sky-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.links}</h3>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button @click="editMode = !editMode" class="action-btn text-xs flex items-center gap-1 px-2 py-1 rounded-lg" :class="editMode ? 'text-red-400' : 'text-sky-400'">
+                                    <i :data-lucide="editMode ? 'x-circle' : 'pencil'" class="w-3 h-3"></i>
+                                </button>
+                                <button @click="showAdd = !showAdd" class="action-btn text-sky-400 text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                    <i :data-lucide="showAdd ? 'minus' : 'plus'" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div x-show="showAdd" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <div class="flex gap-2">
+                                <input type="text" x-model="newName" placeholder="${this.currentLang==='es'?'Nombre':this.currentLang==='en'?'Name':'Name'}" class="glass-input flex-1 px-2 py-1.5 text-xs">
+                                <input type="color" x-model="newColor" class="w-8 h-8 rounded-xl overflow-hidden cursor-pointer border-0 bg-transparent">
+                            </div>
+                            <input type="text" x-model="newUrl" placeholder="https://..." @keydown.enter="if(newName.trim()&&newUrl.trim()){links.push({n:newName,u:newUrl.startsWith('http')?newUrl:'https://'+newUrl,i:newIcon,bg:newColor});newName='';newUrl='';showAdd=false}" class="glass-input w-full px-2 py-1.5 text-xs">
+                            <div class="flex gap-2">
+                                <select x-model="newIcon" class="glass-input flex-1 px-2 py-1.5 text-xs">
+                                    <option value="link">🔗 Link</option><option value="github">🐙 GitHub</option>
+                                    <option value="mail">📧 Mail</option><option value="file-text">📄 Docs</option>
+                                    <option value="globe">🌐 Web</option><option value="code">💻 Code</option>
+                                    <option value="star">⭐ Star</option><option value="heart">❤️ Fav</option>
+                                </select>
+                                <button @click="if(newName.trim()&&newUrl.trim()){links.push({n:newName,u:newUrl.startsWith('http')?newUrl:'https://'+newUrl,i:newIcon,bg:newColor});newName='';newUrl='';showAdd=false}"
+                                        class="rounded-xl px-3 py-1.5 text-xs transition-all"
+                                        style="background:rgba(14,165,233,0.25);border:1px solid rgba(14,165,233,0.35)">
+                                    <i data-lucide="plus" class="w-3 h-3 text-sky-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <template x-for="(link, idx) in links" :key="idx">
+                                <div class="relative group/link">
+                                    <a :href="editMode ? '#' : link.u" @click.prevent="editMode ? null : window.open(link.u, '_blank')"
+                                       class="flex flex-col items-center p-2 rounded-2xl transition-all hover:scale-105 w-full"
+                                       :style="'background:'+link.bg+';border:1px solid rgba(255,255,255,0);border-top-color:rgba(255,255,255,0.22);box-shadow:0 1px 0 rgba(255,255,255,0.14) inset,0 4px 12px '+link.bg+'55'"
+                                       :class="editMode ? 'opacity-70' : ''">
+                                        <i :data-lucide="link.i" class="w-5 h-5 text-white mb-1"></i>
+                                        <span class="text-[9px] text-white/80 truncate w-full text-center font-medium" x-text="link.n"></span>
+                                    </a>
+                                    <button x-show="editMode" @click="links.splice(idx,1)"
+                                            class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
+                                        <i data-lucide="x" class="w-2.5 h-2.5 text-white"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                shoppingTemplate() {
+                    const savedItems = this.getWidgetData('shopping', [
+                        {t:this.currentLang==='es'?'Leche':this.currentLang==='en'?'Milk':this.currentLang==='de'?'Milch':this.currentLang==='zh'?'牛奶':'Mleko',c:false,cat:'super'},
+                        {t:this.currentLang==='es'?'Pan':this.currentLang==='en'?'Bread':this.currentLang==='de'?'Brot':this.currentLang==='zh'?'面包':'Chleb',c:true,cat:'super'},
+                        {t:this.currentLang==='es'?'Huevos':this.currentLang==='en'?'Eggs':this.currentLang==='de'?'Eier':this.currentLang==='zh'?'鸡蛋':'Jajka',c:false,cat:'super'}
+                    ]);
+                    return `<div x-data="{items: ${JSON.stringify(savedItems).replace(/"/g,'&quot;')}, newItem: '', newCategory: 'general'}"
+                         x-init="$watch('items', v => window._saveWidgetData('shopping', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.shopping}</h3>
+                            </div>
+                            <button @click="items = items.filter(i => !i.c)" x-show="items.some(i => i.c)"
+                                    class="action-btn text-xs flex items-center gap-1 px-2 py-1 rounded-lg text-amber-400">
+                                <i data-lucide="check-check" class="w-3 h-3"></i>
+                                <span class="hidden sm:inline">${this.t.clearCompleted}</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" x-model="newItem"
+                                   @keydown.enter="if(newItem.trim()){items.push({t:newItem,c:false,cat:newCategory});newItem=''}"
+                                   placeholder="${this.currentLang==='es'?'Agregar...':this.currentLang==='en'?'Add item...':'Add...'}"
+                                   class="glass-input flex-1 px-3 py-2 text-sm placeholder-white/20">
+                            <select x-model="newCategory" class="glass-input px-2 py-2 text-xs">
+                                <option value="general">General</option>
+                                <option value="super">${this.currentLang==='es'?'Super':this.currentLang==='en'?'Grocery':'Supermarkt'}</option>
+                                <option value="farmacia">${this.currentLang==='es'?'Farmacia':this.currentLang==='en'?'Pharmacy':'Apotheke'}</option>
+                            </select>
+                            <button @click="if(newItem.trim()){items.push({t:newItem,c:false,cat:newCategory});newItem=''}"
+                                    class="rounded-xl px-3 transition-all"
+                                    style="background:rgba(245,158,11,0.22);border:1px solid rgba(245,158,11,0.30);border-top-color:rgba(255,255,255,0.18)">
+                                <i data-lucide="plus" class="w-4 h-4 text-amber-400"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                            <template x-for="(item, i) in items" :key="i">
+                                <div class="flex items-center gap-2 p-2 rounded-xl transition-all"
+                                     :style="item.c ? 'opacity:0.40' : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.10)'">
+                                    <button @click="item.c = !item.c"
+                                            class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                                            :style="item.c ? 'background:rgba(245,158,11,0.70);border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,0.18) inset' : 'border-color:rgba(255,255,255,0.22)'">
+                                        <i data-lucide="check" class="w-2.5 h-2.5 text-white" x-show="item.c"></i>
+                                    </button>
+                                    <div class="flex-1 min-w-0">
+                                        <span class="text-sm block truncate font-light" :class="{'line-through':item.c}" x-text="item.t"></span>
+                                        <span class="text-[9px] opacity-30 uppercase tracking-wider" x-text="item.cat"></span>
+                                    </div>
+                                    <button @click="items.splice(i,1)" class="action-btn delete w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                readingTemplate() {
+                    const savedReading = this.getWidgetData('reading', { current:{t:'Atomic Habits',a:'James Clear',p:65}, toRead:[{t:'Deep Work',a:'Cal Newport'}] });
+                    return `<div x-data="{current: ${JSON.stringify(savedReading.current).replace(/"/g,'&quot;')}, toRead: ${JSON.stringify(savedReading.toRead).replace(/"/g,'&quot;')}, showAddBook: false, newBookTitle: '', newBookAuthor: ''}"
+                         x-init="$watch('current', v => window._saveWidgetData('reading', {current: v, toRead: toRead})); $watch('toRead', v => window._saveWidgetData('reading', {current: current, toRead: v}))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="book-open" class="w-4 h-4 text-violet-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.reading}</h3>
+                            </div>
+                            <button @click="showAddBook = !showAddBook" class="action-btn text-violet-400 text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                <i :data-lucide="showAddBook ? 'minus' : 'plus'" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        <div x-show="showAddBook" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <input type="text" x-model="newBookTitle" placeholder="${this.currentLang==='es'?'Título':this.currentLang==='en'?'Title':'Titel'}" class="glass-input w-full px-2 py-1.5 text-xs">
+                            <div class="flex gap-2">
+                                <input type="text" x-model="newBookAuthor" placeholder="${this.currentLang==='es'?'Autor':'Author'}" @keydown.enter="if(newBookTitle.trim()){toRead.push({t:newBookTitle,a:newBookAuthor||'?'});newBookTitle='';newBookAuthor='';showAddBook=false}" class="glass-input flex-1 px-2 py-1.5 text-xs">
+                                <button @click="if(newBookTitle.trim()){toRead.push({t:newBookTitle,a:newBookAuthor||'?'});newBookTitle='';newBookAuthor='';showAddBook=false}"
+                                        class="rounded-xl px-3 transition-all"
+                                        style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.35)">
+                                    <i data-lucide="plus" class="w-3 h-3 text-violet-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl p-3 mb-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)">
+                            <p class="text-[10px] opacity-35 uppercase tracking-widest mb-2">${this.currentLang==='es'?'Leyendo ahora':this.currentLang==='en'?'Reading now':'Jetzt lesen'}</p>
+                            <div x-show="current.t">
+                                <p class="font-medium text-sm" x-text="current.t"></p>
+                                <p class="text-xs opacity-45 font-light" x-text="current.a"></p>
+                                <div class="mt-2.5">
+                                    <div class="flex justify-between text-xs opacity-35 mb-1">
+                                        <span class="uppercase tracking-wider text-[10px]">${this.currentLang==='es'?'Progreso':this.currentLang==='en'?'Progress':'Fortschritt'}</span>
+                                        <span class="font-mono" x-text="current.p + '%'"></span>
+                                    </div>
+                                    <input type="range" min="0" max="100" x-model.number="current.p" class="w-full h-1 rounded-full accent-violet-500 cursor-pointer">
+                                </div>
+                                <div class="flex gap-2 mt-2">
+                                    <button @click="current.p = Math.min(100, current.p + 10)" class="flex-1 rounded-xl py-1 text-[10px] transition-all" style="background:rgba(139,92,246,0.20);border:1px solid rgba(139,92,246,0.25)">+10%</button>
+                                    <button @click="current.p = 100" class="flex-1 rounded-xl py-1 text-[10px] transition-all" style="background:rgba(34,197,94,0.20);border:1px solid rgba(34,197,94,0.25)">${this.currentLang==='es'?'Terminar':this.currentLang==='en'?'Finish':'Fertig'}</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-1 max-h-32 overflow-y-auto">
+                            <template x-for="(book, idx) in toRead" :key="idx">
+                                <div class="flex items-center gap-2 p-2 rounded-xl text-xs transition-all" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium truncate" x-text="book.t"></p>
+                                        <p class="opacity-40 truncate font-light" x-text="book.a"></p>
+                                    </div>
+                                    <div class="flex gap-1 flex-shrink-0">
+                                        <button @click="current = {t: book.t, a: book.a, p: 0}; toRead.splice(idx, 1)" class="action-btn check w-5 h-5 rounded flex items-center justify-center text-emerald-400">
+                                            <i data-lucide="book-open" class="w-3 h-3"></i>
+                                        </button>
+                                        <button @click="toRead.splice(idx, 1)" class="action-btn delete w-5 h-5 rounded flex items-center justify-center text-red-400">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                clockTemplate() {
+                    const defaultCities = [
+                        {n:'Nueva York',tz:'America/New_York'},{n:'Londres',tz:'Europe/London'},
+                        {n:'París',tz:'Europe/Paris'},{n:'Tokio',tz:'Asia/Tokyo'}
+                    ];
+                    const rawClock = this.getWidgetData('clock', defaultCities);
+                    const cities = Array.isArray(rawClock) ? rawClock.map(c => c.tz?c:{n:c.n,tz:'UTC'}) : defaultCities;
+                    const tx = {
+                        title: this.currentLang==='es'?'Reloj Mundial':this.currentLang==='en'?'World Clock':this.currentLang==='de'?'Weltuhr':this.currentLang==='zh'?'世界时钟':'Zegar Światowy',
+                        add: this.currentLang==='es'?'Agregar':this.currentLang==='en'?'Add':this.currentLang==='de'?'Hinzufügen':this.currentLang==='zh'?'添加':'Dodaj',
+                        cityName: this.currentLang==='es'?'Nombre ciudad':this.currentLang==='en'?'City name':'City name',
+                        cancel: this.currentLang==='es'?'Cancelar':this.currentLang==='en'?'Cancel':'Cancel'
+                    };
+                    const tzList = [
+                        {l:'UTC',v:'UTC'},{l:'Nueva York',v:'America/New_York'},{l:'Los Ángeles',v:'America/Los_Angeles'},
+                        {l:'México DF',v:'America/Mexico_City'},{l:'Buenos Aires',v:'America/Argentina/Buenos_Aires'},
+                        {l:'São Paulo',v:'America/Sao_Paulo'},{l:'Londres',v:'Europe/London'},{l:'Madrid',v:'Europe/Madrid'},
+                        {l:'París',v:'Europe/Paris'},{l:'Berlín',v:'Europe/Berlin'},{l:'Moscú',v:'Europe/Moscow'},
+                        {l:'Dubái',v:'Asia/Dubai'},{l:'Mumbai',v:'Asia/Kolkata'},{l:'Bangkok',v:'Asia/Bangkok'},
+                        {l:'Singapur',v:'Asia/Singapore'},{l:'Beijing',v:'Asia/Shanghai'},{l:'Tokio',v:'Asia/Tokyo'},
+                        {l:'Seúl',v:'Asia/Seoul'},{l:'Sydney',v:'Australia/Sydney'},{l:'Auckland',v:'Pacific/Auckland'}
+                    ];
+                    return `<div x-data="{
+                            cities: ${JSON.stringify(cities).replace(/"/g,'&quot;')},
+                            times: {}, dates: {},
+                            showAdd: false, newName: '', newTz: 'Europe/London', _timer: null,
+                            tzList: ${JSON.stringify(tzList).replace(/"/g,'&quot;')},
+                            getTime(tz){ try{ return new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}); }catch(e){return '--:--';} },
+                            getDate(tz){ try{ return new Date().toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short',timeZone:tz}); }catch(e){return '';} },
+                            isToday(tz){ try{ return new Date().toLocaleDateString('en-CA')===new Date().toLocaleDateString('en-CA',{timeZone:tz}); }catch(e){return true;} },
+                            refresh(){ var t={},d={}; this.cities.forEach(c=>{t[c.tz]=this.getTime(c.tz);d[c.tz]=this.getDate(c.tz);}); this.times=t;this.dates=d; },
+                            addCity(){ if(!this.newName.trim())return; this.cities=[...this.cities,{n:this.newName.trim(),tz:this.newTz}]; this.newName='';this.showAdd=false;this.refresh();window._saveWidgetData('clock',this.cities); },
+                            removeCity(i){ this.cities=this.cities.filter((_,idx)=>idx!==i);this.refresh();window._saveWidgetData('clock',this.cities); }
+                        }"
+                        x-init="refresh();_timer=setInterval(()=>refresh(),10000);$watch('cities',()=>window._saveWidgetData('clock',cities));"
+                        x-effect="refresh()">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${tx.title}</h3>
+                            </div>
+                            <button @click="showAdd=!showAdd" class="action-btn text-cyan-400 flex items-center gap-1 px-2 py-1 rounded-lg text-xs">
+                                <i :data-lucide="showAdd?'minus':'plus'" class="w-3 h-3"></i>
+                                <span>${tx.add}</span>
+                            </button>
+                        </div>
+                        <div x-show="showAdd" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <input type="text" x-model="newName" placeholder="${tx.cityName}" @keydown.enter="addCity()" class="glass-input w-full px-2 py-1.5 text-xs">
+                            <select x-model="newTz" class="glass-input w-full px-2 py-1.5 text-xs">
+                                <template x-for="tz in tzList" :key="tz.v">
+                                    <option :value="tz.v" x-text="tz.l"></option>
+                                </template>
+                            </select>
+                            <div class="flex gap-2">
+                                <button @click="addCity()" class="flex-1 py-1.5 rounded-xl text-xs font-medium transition-all" style="background:rgba(6,182,212,0.25);border:1px solid rgba(6,182,212,0.35);border-top-color:rgba(255,255,255,0.18)">${tx.add}</button>
+                                <button @click="showAdd=false;newName=''" class="px-3 py-1.5 rounded-xl text-xs opacity-50 hover:opacity-80 transition-all" style="background:rgba(255,255,255,0.05)">${tx.cancel}</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <template x-for="(city, i) in cities" :key="city.tz+i">
+                                <div class="relative group/city rounded-2xl p-3 transition-all" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)">
+                                    <button @click.stop="removeCity(i)" class="absolute top-2 right-2 opacity-0 group-hover/city:opacity-100 transition-opacity text-red-400 rounded-full p-0.5" style="background:rgba(239,68,68,0.12)">
+                                        <i data-lucide="x" class="w-2.5 h-2.5"></i>
+                                    </button>
+                                    <p class="text-[11px] font-medium opacity-45 truncate pr-4 tracking-wide" x-text="city.n"></p>
+                                    <p class="text-2xl font-light font-mono tracking-tighter leading-tight" x-text="times[city.tz]||'--:--'"></p>
+                                    <p class="text-[9px] opacity-28 mt-0.5 font-light" x-text="dates[city.tz]||''"></p>
+                                    <span x-show="!isToday(city.tz)" class="inline-block text-[8px] rounded px-1 mt-0.5 font-medium" style="background:rgba(245,158,11,0.18);color:#fbbf24">+1d</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                initCharts() {
+                    this.destroyCharts();
+                    document.querySelectorAll('canvas[data-chart-id]').forEach(canvas => {
+                        const chartId = canvas.getAttribute('data-chart-id');
+                        const savedAnalytics = (window._widgetDataCache && window._widgetDataCache['analytics'])
+                            ? window._widgetDataCache['analytics']
+                            : { data:[6,7,5,8,6,4,3], type:'bar' };
+                        let labels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+                        try { const raw = canvas.getAttribute('data-labels'); if(raw) labels = JSON.parse(raw); } catch(e){}
+                        window._rebuildAnalyticsChart(chartId, savedAnalytics.data, savedAnalytics.type, labels, this.currentTheme, this.customColors);
+                    });
+                },
+
+                _setupRebuildHelper() {
+                    const self = this;
+                    window._rebuildAnalyticsChart = function(chartId, data, type, labels, theme, customColors) {
+                        const canvas = document.getElementById(chartId);
+                        if (!canvas) return;
+                        const ctx = canvas.getContext('2d');
+                        const currentTheme = theme || self.currentTheme;
+                        const cc = customColors || self.customColors;
+                        if (!labels) {
+                            try { labels = JSON.parse(canvas.getAttribute('data-labels')); } catch(e){}
+                            labels = labels || ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+                        }
+                        const primaryColor = currentTheme === 'custom' ? cc.primary : '#8b5cf6';
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                        gradient.addColorStop(0, primaryColor + 'CC');
+                        gradient.addColorStop(1, primaryColor + '18');
+                        const isDark = currentTheme !== 'light';
+                        const tickColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.40)';
+                        const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+                        const tooltipBg = isDark ? 'rgba(10,10,20,0.92)' : 'rgba(255,255,255,0.96)';
+                        const tooltipColor = isDark ? '#fff' : '#000';
+                        window.chartInstances[chartId] = new Chart(ctx, {
+                            type: type || 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Score',
+                                    data: data || [null,null,null,null,null,null,null],
+                                    backgroundColor: type === 'line' ? primaryColor + '28' : gradient,
+                                    borderColor: primaryColor,
+                                    borderWidth: type === 'line' ? 2 : 0,
+                                    borderRadius: type === 'line' ? 0 : 8,
+                                    borderSkipped: false,
+                                    fill: type === 'line',
+                                    tension: 0.45,
+                                    pointBackgroundColor: primaryColor,
+                                    pointRadius: type === 'line' ? 3 : 0,
+                                    pointHoverRadius: 5,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: { duration: 700, easing: 'easeOutQuart' },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: tooltipBg,
+                                        titleColor: tooltipColor,
+                                        bodyColor: tooltipColor,
+                                        borderColor: primaryColor + '45',
+                                        borderWidth: 1,
+                                        padding: 8,
+                                        cornerRadius: 10,
+                                        callbacks: { label: ctx => ctx.parsed.y !== null ? ' '+ctx.parsed.y+'/10' : ' No data' }
+                                    }
+                                },
+                                scales: {
+                                    x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 10, family: 'DM Mono' } } },
+                                    y: { min: 0, max: 10, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10, family: 'DM Mono' }, stepSize: 2 } }
+                                }
+                            }
+                        });
+                    };
+                },
+
+                destroyCharts() {
+                    Object.values(window.chartInstances).forEach(chart => {
+                        if (chart && typeof chart.destroy === 'function') chart.destroy();
+                    });
+                    window.chartInstances = {};
+                },
+
+                reinitCharts() {
+                    this.destroyCharts();
+                    this.$nextTick(() => { setTimeout(() => this.initCharts(), 100); });
+                }
+            };
+        }
+    </script>
+</body>
+</html>
