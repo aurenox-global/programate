@@ -1,0 +1,2398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard Pro</title>
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- SortableJS -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+    <style>
+        /* ============================================================
+           RESET & BASE
+           ============================================================ */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; font-size: 16px; }
+        * { -webkit-font-smoothing: antialiased; }
+        button { cursor: pointer; font-family: inherit; background: none; border: none; color: inherit; }
+        input, select, textarea { font-family: inherit; }
+        a { text-decoration: none; color: inherit; }
+
+        /* ============================================================
+           CSS VARIABLES — THEMES
+           ============================================================ */
+        :root {
+            --bg: #0f0f1a;
+            --bg-2: #1a1a2e;
+            --card: #1e1e30;
+            --card-2: #252538;
+            --border: rgba(255,255,255,0.09);
+            --border-top: rgba(255,255,255,0.16);
+            --text: #e8e8f0;
+            --text-muted: rgba(232,232,240,0.45);
+            --text-subtle: rgba(232,232,240,0.28);
+            --shadow: 0 1px 3px rgba(0,0,0,0.4), 0 4px 16px rgba(0,0,0,0.3);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.5);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-lg: 20px;
+            --accent: #7c6bfa;
+            --accent-hover: #9080ff;
+            --t: all 0.2s ease;
+        }
+
+        .light {
+            --bg: #f0f0f8;
+            --bg-2: #e4e4f0;
+            --card: #ffffff;
+            --card-2: #f5f5fc;
+            --border: rgba(0,0,0,0.09);
+            --border-top: rgba(0,0,0,0.12);
+            --text: #1a1a2e;
+            --text-muted: rgba(26,26,46,0.5);
+            --text-subtle: rgba(26,26,46,0.3);
+            --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+            --shadow-lg: 0 4px 24px rgba(0,0,0,0.1);
+        }
+
+        /* ============================================================
+           LAYOUT UTILITIES
+           ============================================================ */
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .flex-1 { flex: 1 1 0%; }
+        .flex-wrap { flex-wrap: wrap; }
+        .flex-shrink-0 { flex-shrink: 0; }
+        .inline-flex { display: inline-flex; }
+        .inline-block { display: inline-block; }
+        .inline { display: inline; }
+        .block { display: block; }
+        .hidden { display: none; }
+        .items-center { align-items: center; }
+        .items-start { align-items: flex-start; }
+        .items-end { align-items: flex-end; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .justify-end { justify-content: flex-end; }
+        .self-end { align-self: flex-end; }
+
+        .grid { display: grid; }
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-cols-7 { grid-template-columns: repeat(7, 1fr); }
+        .col-span-2 { grid-column: span 2; }
+
+        /* Responsive grid */
+        @media (min-width: 640px) {
+            .sm\:inline { display: inline; }
+            .sm\:flex { display: flex; }
+            .sm\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+            .sm\:hidden { display: none; }
+        }
+        @media (min-width: 1024px) {
+            .lg\:flex-row { flex-direction: row; }
+            .lg\:items-center { align-items: center; }
+            .lg\:justify-between { justify-content: space-between; }
+        }
+
+        /* ============================================================
+           POSITION
+           ============================================================ */
+        .relative { position: relative; }
+        .absolute { position: absolute; }
+        .fixed { position: fixed; }
+        .sticky { position: sticky; }
+        .inset-0 { inset: 0; }
+        .top-0 { top: 0; }
+        .bottom-0 { bottom: 0; }
+        .left-0 { left: 0; }
+        .right-0 { right: 0; }
+        .top-2 { top: 0.5rem; }
+        .right-2 { right: 0.5rem; }
+        .-top-1\.5 { top: -0.375rem; }
+        .-right-1\.5 { right: -0.375rem; }
+        .z-0 { z-index: 0; }
+        .z-10 { z-index: 10; }
+        .z-20 { z-index: 20; }
+        .z-30 { z-index: 30; }
+        .z-40 { z-index: 40; }
+        .z-50 { z-index: 50; }
+
+        /* ============================================================
+           SIZING
+           ============================================================ */
+        .w-2 { width: 0.5rem; }
+        .w-2\.5 { width: 0.625rem; }
+        .w-3 { width: 0.75rem; }
+        .w-3\.5 { width: 0.875rem; }
+        .w-4 { width: 1rem; }
+        .w-4\.5 { width: 1.125rem; }
+        .w-5 { width: 1.25rem; }
+        .w-6 { width: 1.5rem; }
+        .w-7 { width: 1.75rem; }
+        .w-8 { width: 2rem; }
+        .w-9 { width: 2.25rem; }
+        .w-14 { width: 3.5rem; }
+        .w-16 { width: 4rem; }
+        .w-20 { width: 5rem; }
+        .w-full { width: 100%; }
+        .h-1 { height: 0.25rem; }
+        .h-1\.5 { height: 0.375rem; }
+        .h-2 { height: 0.5rem; }
+        .h-2\.5 { height: 0.625rem; }
+        .h-3 { height: 0.75rem; }
+        .h-3\.5 { height: 0.875rem; }
+        .h-4 { height: 1rem; }
+        .h-4\.5 { height: 1.125rem; }
+        .h-5 { height: 1.25rem; }
+        .h-6 { height: 1.5rem; }
+        .h-7 { height: 1.75rem; }
+        .h-8 { height: 2rem; }
+        .h-9 { height: 2.25rem; }
+        .h-14 { height: 3.5rem; }
+        .h-16 { height: 4rem; }
+        .h-20 { height: 5rem; }
+        .h-28 { height: 7rem; }
+        .h-40 { height: 10rem; }
+        .h-48 { height: 12rem; }
+        .h-full { height: 100%; }
+        .min-h-screen { min-height: 100vh; }
+        .max-h-20 { max-height: 5rem; }
+        .max-h-28 { max-height: 7rem; }
+        .max-h-32 { max-height: 8rem; }
+        .max-h-48 { max-height: 12rem; }
+        .max-h-\[90vh\] { max-height: 90vh; }
+        .max-w-md { max-width: 28rem; }
+        .max-w-2xl { max-width: 42rem; }
+        .max-w-\[1600px\] { max-width: 1600px; }
+        .min-w-0 { min-width: 0; }
+        .container { width: 100%; margin-left: auto; margin-right: auto; }
+
+        /* ============================================================
+           SPACING
+           ============================================================ */
+        .gap-0\.5 { gap: 0.125rem; }
+        .gap-1 { gap: 0.25rem; }
+        .gap-1\.5 { gap: 0.375rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-2\.5 { gap: 0.625rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-5 { gap: 1.25rem; }
+        .gap-6 { gap: 1.5rem; }
+        .space-y-1 > * + * { margin-top: 0.25rem; }
+        .space-y-1\.5 > * + * { margin-top: 0.375rem; }
+        .space-y-2 > * + * { margin-top: 0.5rem; }
+        .space-y-5 > * + * { margin-top: 1.25rem; }
+        .space-y-7 > * + * { margin-top: 1.75rem; }
+
+        .p-0\.5 { padding: 0.125rem; }
+        .p-1 { padding: 0.25rem; }
+        .p-1\.5 { padding: 0.375rem; }
+        .p-2 { padding: 0.5rem; }
+        .p-2\.5 { padding: 0.625rem; }
+        .p-3 { padding: 0.75rem; }
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-7 { padding: 1.75rem; }
+        .p-8 { padding: 2rem; }
+        .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+        .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+        .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+        .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+        .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+        .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        .py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        .pt-4 { padding-top: 1rem; }
+        .pb-4 { padding-bottom: 1rem; }
+        .pr-8 { padding-right: 2rem; }
+
+        .m-0 { margin: 0; }
+        .mx-auto { margin-left: auto; margin-right: auto; }
+        .my-0 { margin-top: 0; margin-bottom: 0; }
+        .mt-0\.5 { margin-top: 0.125rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-1\.5 { margin-top: 0.375rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-2\.5 { margin-top: 0.625rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-7 { margin-top: 1.75rem; }
+        .mt-10 { margin-top: 2.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-5 { margin-bottom: 1.25rem; }
+        .ml-auto { margin-left: auto; }
+        .ml-1 { margin-left: 0.25rem; }
+        .mr-0 { margin-right: 0; }
+
+        @media (min-width: 1024px) {
+            .lg\:p-5 { padding: 1.25rem; }
+            .lg\:p-7 { padding: 1.75rem; }
+            .lg\:p-8 { padding: 2rem; }
+            .lg\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .lg\:py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+            .lg\:mb-7 { margin-bottom: 1.75rem; }
+            .lg\:gap-3 { gap: 0.75rem; }
+        }
+
+        /* ============================================================
+           TYPOGRAPHY
+           ============================================================ */
+        .text-\[8px\] { font-size: 8px; }
+        .text-\[9px\] { font-size: 9px; }
+        .text-\[10px\] { font-size: 10px; }
+        .text-\[11px\] { font-size: 11px; }
+        .text-xs { font-size: 0.75rem; line-height: 1rem; }
+        .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+        .text-base { font-size: 1rem; line-height: 1.5rem; }
+        .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+        .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+        .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+        .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+        .font-light { font-weight: 300; }
+        .font-normal { font-weight: 400; }
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .font-mono { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace; }
+        .tracking-tight { letter-spacing: -0.02em; }
+        .tracking-wide { letter-spacing: 0.025em; }
+        .tracking-wider { letter-spacing: 0.05em; }
+        .tracking-widest { letter-spacing: 0.1em; }
+        .leading-tight { line-height: 1.25; }
+        .leading-relaxed { line-height: 1.625; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .text-left { text-align: left; }
+        .uppercase { text-transform: uppercase; }
+        .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .whitespace-nowrap { white-space: nowrap; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        .line-through { text-decoration: line-through; }
+        .italic { font-style: italic; }
+        .select-none { user-select: none; }
+
+        @media (min-width: 1024px) {
+            .lg\:text-\[2\.2rem\] { font-size: 2.2rem; line-height: 2.5rem; }
+        }
+
+        /* ============================================================
+           COLORS — Text
+           ============================================================ */
+        .text-white { color: #ffffff; }
+        .text-black { color: #000000; }
+        .text-gray-300 { color: #d1d5db; }
+        .text-gray-900 { color: #111827; }
+        .text-red-400 { color: #f87171; }
+        .text-red-300 { color: #fca5a5; }
+        .text-orange-400 { color: #fb923c; }
+        .text-amber-400 { color: #fbbf24; }
+        .text-yellow-400 { color: #facc15; }
+        .text-green-400 { color: #4ade80; }
+        .text-emerald-400 { color: #34d399; }
+        .text-teal-300 { color: #5eead4; }
+        .text-teal-400 { color: #2dd4bf; }
+        .text-cyan-300 { color: #67e8f9; }
+        .text-cyan-400 { color: #22d3ee; }
+        .text-sky-400 { color: #38bdf8; }
+        .text-blue-400 { color: #60a5fa; }
+        .text-indigo-400 { color: #818cf8; }
+        .text-violet-300 { color: #c4b5fd; }
+        .text-violet-400 { color: #a78bfa; }
+        .text-purple-400 { color: #c084fc; }
+        .text-pink-400 { color: #f472b6; }
+        .text-rose-400 { color: #fb7185; }
+
+        /* ============================================================
+           COLORS — Background
+           ============================================================ */
+        .bg-red-500 { background-color: #ef4444; }
+        .bg-transparent { background-color: transparent; }
+        .bg-black\/40 { background-color: rgba(0,0,0,0.4); }
+
+        /* ============================================================
+           OPACITY
+           ============================================================ */
+        .opacity-0 { opacity: 0; }
+        .opacity-14 { opacity: 0.14; }
+        .opacity-18 { opacity: 0.18; }
+        .opacity-20 { opacity: 0.20; }
+        .opacity-25 { opacity: 0.25; }
+        .opacity-28 { opacity: 0.28; }
+        .opacity-30 { opacity: 0.30; }
+        .opacity-35 { opacity: 0.35; }
+        .opacity-40 { opacity: 0.40; }
+        .opacity-45 { opacity: 0.45; }
+        .opacity-50 { opacity: 0.50; }
+        .opacity-55 { opacity: 0.55; }
+        .opacity-60 { opacity: 0.60; }
+        .opacity-65 { opacity: 0.65; }
+        .opacity-70 { opacity: 0.70; }
+        .opacity-72 { opacity: 0.72; }
+        .opacity-75 { opacity: 0.75; }
+        .opacity-80 { opacity: 0.80; }
+        .opacity-100 { opacity: 1; }
+
+        /* ============================================================
+           BORDERS & RADIUS
+           ============================================================ */
+        .rounded { border-radius: 0.25rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-3xl { border-radius: 1.5rem; }
+        .rounded-full { border-radius: 9999px; }
+        .border { border: 1px solid var(--border); }
+        .border-2 { border: 2px solid var(--border); }
+        .border-t { border-top: 1px solid var(--border); }
+        .border-b { border-bottom: 1px solid var(--border); }
+        .border-0 { border: none; }
+        .border-none { border: none; }
+        .overflow-hidden { overflow: hidden; }
+        .overflow-y-auto { overflow-y: auto; }
+        .overflow-x-hidden { overflow-x: hidden; }
+
+        /* ============================================================
+           HOVER & INTERACTIVE
+           ============================================================ */
+        .hover\:opacity-70:hover { opacity: 0.70; }
+        .hover\:opacity-80:hover { opacity: 0.80; }
+        .hover\:opacity-100:hover { opacity: 1; }
+        .hover\:scale-105:hover { transform: scale(1.05); }
+        .hover\:scale-125:hover { transform: scale(1.25); }
+        .hover\:text-red-400:hover { color: #f87171; }
+        .hover\:text-red-300:hover { color: #fca5a5; }
+        .hover\:bg-white\/08:hover { background-color: rgba(255,255,255,0.08); }
+        .hover\:bg-white\/04:hover { background-color: rgba(255,255,255,0.04); }
+        .scale-110 { transform: scale(1.10); }
+        .scale-125 { transform: scale(1.25); }
+        .-rotate-90 { transform: rotate(-90deg); }
+        .transform { /* noop - used with other transform classes */ }
+        .hover\:text-red-400:hover { color: #f87171; }
+        .group-hover\/link\:opacity-100 { opacity: 1; }
+        .group-hover\/city\:opacity-100 { opacity: 1; }
+        .group\/link:hover .group-hover\/link\:opacity-100 { opacity: 1; }
+        .group-hover\:opacity-100 { } /* base */
+        .group:hover .group-hover\:opacity-100 { opacity: 1; }
+        .group:hover .group-hover\:opacity-60 { opacity: 0.6; }
+
+        /* ============================================================
+           TRANSITIONS
+           ============================================================ */
+        .transition-all { transition: all 0.2s ease; }
+        .transition-colors { transition: color 0.2s ease; }
+        .transition-opacity { transition: opacity 0.2s ease; }
+        .duration-\[4000ms\] { transition-duration: 4000ms; }
+
+        /* ============================================================
+           CURSOR & MISC
+           ============================================================ */
+        .cursor-pointer { cursor: pointer; }
+        .cursor-grab { cursor: grab; }
+        .cursor-grabbing { cursor: grabbing; }
+        .isolate { isolation: isolate; }
+        .pointer-events-none { pointer-events: none; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+        /* Range input */
+        input[type="range"] { cursor: pointer; accent-color: var(--accent); }
+        .accent-violet-500 { accent-color: #8b5cf6; }
+        .accent-purple-500 { accent-color: #a855f7; }
+
+        /* ============================================================
+           DASHBOARD LAYOUT
+           ============================================================ */
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: 1fr;
+        }
+        @media (min-width: 640px) { .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+        @media (min-width: 768px) { .dashboard-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; } }
+        @media (min-width: 1024px) { .dashboard-grid { grid-template-columns: repeat(4, 1fr); gap-18px; } }
+        @media (min-width: 1280px) { .dashboard-grid { grid-template-columns: repeat(5, 1fr); gap: 18px; } }
+
+        .widget-span-2 { grid-column: span 1; }
+        .widget-span-rows-2 { grid-row: span 1; }
+        @media (min-width: 768px) {
+            .widget-span-2 { grid-column: span 2; }
+            .widget-span-rows-2 { grid-row: span 2; }
+        }
+
+        /* ============================================================
+           HEADER COMPONENT
+           ============================================================ */
+        .app-header {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-top-color: var(--border-top);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+        @media (min-width: 1024px) {
+            .app-header { padding: 1.5rem 2rem; margin-bottom: 1.75rem; }
+        }
+        .app-header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+        @media (min-width: 1024px) { .app-header h1 { font-size: 2.1rem; } }
+        .header-accent { color: var(--accent); }
+
+        /* ============================================================
+           WIDGET CARD
+           ============================================================ */
+        .glass-widget {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-top-color: var(--border-top);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        @media (min-width: 1024px) { .glass-widget { padding: 1.25rem; } }
+        .glass-widget:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-1px);
+        }
+
+        /* ============================================================
+           GLASS HEADER (alias for app-header in static HTML)
+           ============================================================ */
+        .glass-header {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-top-color: var(--border-top);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+        }
+
+        /* ============================================================
+           GLASS MODAL
+           ============================================================ */
+        .glass-modal {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-top-color: var(--border-top);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ============================================================
+           GLASS BUTTONS
+           ============================================================ */
+        .glass-btn {
+            background-color: var(--card-2);
+            border: 1px solid var(--border);
+            border-top-color: var(--border-top);
+            border-radius: var(--radius-sm);
+            transition: var(--t);
+            color: var(--text);
+        }
+        .glass-btn:hover {
+            background-color: var(--bg-2);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .glass-btn-accent {
+            background: var(--accent);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: var(--radius-sm);
+            color: white;
+            font-weight: 500;
+            transition: var(--t);
+        }
+        .glass-btn-accent:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 16px rgba(124,107,250,0.35);
+        }
+
+        .glass-btn-danger {
+            background: rgba(239,68,68,0.12);
+            border: 1px solid rgba(239,68,68,0.25);
+            border-radius: var(--radius-sm);
+            color: #f87171;
+            transition: var(--t);
+        }
+        .glass-btn-danger:hover {
+            background: rgba(239,68,68,0.2);
+        }
+
+        /* ============================================================
+           GLASS INPUT
+           ============================================================ */
+        .glass-input {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            outline: none;
+            transition: var(--t);
+        }
+        .glass-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(124,107,250,0.2);
+        }
+        .glass-input::placeholder { color: var(--text-subtle); }
+
+        /* ============================================================
+           PILL SELECTOR (theme switcher)
+           ============================================================ */
+        .glass-pill {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 3px;
+        }
+        .glass-pill-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px;
+            border-radius: 999px;
+            transition: var(--t);
+            color: var(--text-muted);
+            min-width: 32px;
+            min-height: 32px;
+        }
+        .glass-pill-btn.active {
+            background: var(--card);
+            box-shadow: var(--shadow);
+            color: var(--text);
+        }
+
+        /* ============================================================
+           DROPDOWN
+           ============================================================ */
+        .glass-dropdown {
+            background-color: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+        .glass-dropdown-item {
+            padding: 8px 14px;
+            transition: background 0.15s ease;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+        .glass-dropdown-item:hover {
+            background: var(--card-2);
+        }
+
+        /* ============================================================
+           SETTINGS ROW
+           ============================================================ */
+        .glass-setting-row {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.625rem;
+            cursor: pointer;
+            transition: var(--t);
+        }
+        .glass-setting-row:hover { background: var(--bg-2); }
+        .glass-setting-row.active {
+            background: rgba(124,107,250,0.12);
+            border-color: rgba(124,107,250,0.3);
+        }
+
+        /* ============================================================
+           DRAG HANDLE
+           ============================================================ */
+        .drag-handle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            cursor: grab;
+            z-index: 20;
+            color: var(--text-muted);
+        }
+        .glass-widget:hover .drag-handle { opacity: 1; }
+
+        /* ============================================================
+           SORTABLE
+           ============================================================ */
+        .sortable-ghost {
+            opacity: 0.3;
+            background: rgba(124,107,250,0.08);
+            border: 1.5px dashed rgba(124,107,250,0.4);
+        }
+        .sortable-drag {
+            cursor: grabbing;
+            transform: scale(1.03);
+            box-shadow: var(--shadow-lg) !important;
+        }
+
+        /* ============================================================
+           ACTION BUTTONS
+           ============================================================ */
+        .action-btn {
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.15s ease;
+            opacity: 0.5;
+            color: var(--text);
+        }
+        .action-btn:hover { opacity: 1; background: var(--card-2); }
+        .action-btn.delete:hover { color: #f87171; background: rgba(248,113,113,0.1); }
+        .action-btn.check:hover { color: #34d399; background: rgba(52,211,153,0.1); }
+        .action-btn.reset:hover { color: #fbbf24; background: rgba(251,191,36,0.1); }
+
+        /* ============================================================
+           MISC COMPONENT STYLES
+           ============================================================ */
+        .task-complete { text-decoration: line-through; opacity: 0.4; }
+        .progress-ring-circle { transition: stroke-dashoffset 0.5s ease-in-out; transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .calc-btn { transition: all 0.1s; }
+        .calc-btn:active { transform: scale(0.94); }
+        .mood-emoji { transition: all 0.25s ease; }
+        .mood-emoji:hover { transform: scale(1.2); }
+        .mood-selected { transform: scale(1.3); filter: drop-shadow(0 0 8px currentColor); }
+        .float-animation { } /* no animation in lite mode */
+
+        /* ============================================================
+           TOUCH TARGETS
+           ============================================================ */
+        @media (max-width: 768px) {
+            .touch-target { min-height: 44px; min-width: 44px; }
+        }
+
+        /* ============================================================
+           RING (for color pickers)
+           ============================================================ */
+        .ring-2 { box-shadow: 0 0 0 2px rgba(255,255,255,0.6); }
+        .ring-offset-2 { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px rgba(255,255,255,0.6); }
+
+        /* ============================================================
+           THEME TRANSITIONS
+           ============================================================ */
+        .theme-transition { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+
+        /* ============================================================
+           BACKGROUND
+           ============================================================ */
+        body.dark-bg { background: linear-gradient(135deg, #0d0d1a 0%, #111120 100%); }
+        body.light-bg { background: linear-gradient(135deg, #eeeef8 0%, #f4f4fc 100%); }
+
+        /* ============================================================
+           PLACEHOLDER WHITE / OPACITY HELPERS
+           ============================================================ */
+        .placeholder-white\/20::placeholder { color: rgba(255,255,255,0.2); }
+        .placeholder-white\/25::placeholder { color: rgba(255,255,255,0.25); }
+
+        /* ============================================================
+           SHADOW HELPERS
+           ============================================================ */
+        .shadow-lg { box-shadow: var(--shadow-lg); }
+
+        /* ============================================================
+           BORDER COLOR HELPERS used in sticky modal sections
+           ============================================================ */
+        .border-white\/10 { border-color: rgba(255,255,255,0.1); }
+        .border-black\/06 { border-color: rgba(0,0,0,0.06); }
+        .bg-slate-950\/60 { background-color: rgba(2,6,23,0.6); }
+        .bg-white\/70 { background-color: rgba(255,255,255,0.7); }
+        .border-white\/08 { border-color: rgba(255,255,255,0.08); }
+
+        /* ============================================================
+           BACKDROP (modal overlay) — simplified, no filter
+           ============================================================ */
+        .backdrop-blur-sm { /* removed backdrop-filter */ }
+        .backdrop-blur-xl { /* removed backdrop-filter */ }
+
+        /* ============================================================
+           PRISM EDGE — removed in lite mode
+           ============================================================ */
+        .prism-edge { display: none; }
+
+        /* ============================================================
+           NOISE LAYER — removed
+           ============================================================ */
+        .noise-layer { display: none; }
+
+        /* ============================================================
+           KANBAN CARD
+           ============================================================ */
+        .kanban-card { cursor: grab; }
+        .kanban-card:active { cursor: grabbing; }
+
+        /* ============================================================
+           RING (outline) for checkboxes
+           ============================================================ */
+        input[type="checkbox"] { accent-color: var(--accent); }
+
+        /* ============================================================
+           FOOTER
+           ============================================================ */
+        footer { color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.08em; }
+
+        /* ============================================================
+           LIGHT MODE OVERRIDES for inline border-top-color etc.
+           ============================================================ */
+        .light .glass-widget { background: #ffffff; border-color: rgba(0,0,0,0.08); border-top-color: rgba(0,0,0,0.12); }
+        .light .glass-header { background: #ffffff; }
+        .light .glass-modal { background: #ffffff; }
+        .light .glass-btn { background: #f5f5fc; border-color: rgba(0,0,0,0.1); }
+        .light .glass-dropdown { background: #ffffff; }
+        .light .glass-dropdown-item:hover { background: #f5f5fc; }
+        .light .glass-setting-row { background: #f5f5fc; border-color: rgba(0,0,0,0.1); }
+        .light .glass-setting-row:hover { background: #eeeef8; }
+        .light .glass-input { background: #f0f0f8; border-color: rgba(0,0,0,0.1); }
+        .light .bg-slate-950\/60 { background-color: rgba(255,255,255,0.85); }
+        .light .border-white\/10 { border-color: rgba(0,0,0,0.08); }
+        .light .border-white\/08 { border-color: rgba(0,0,0,0.06); }
+        .light .text-white { color: #1a1a2e; }
+        .light body { color: #1a1a2e; }
+
+        /* ============================================================
+           EXTRA UTILITIES
+           ============================================================ */
+        .py-24 { padding-top: 6rem; padding-bottom: 6rem; }
+        .w-44 { width: 11rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .filter { } /* no-op in lite mode */
+        .-translate-y-2 { transform: translateY(-0.5rem); }
+        .translate-y-4 { transform: translateY(1rem); }
+        .ease-out { transition-timing-function: cubic-bezier(0,0,0.2,1); }
+        .ease-in { transition-timing-function: cubic-bezier(0.4,0,1,1); }
+        .duration-150 { transition-duration: 150ms; }
+        .duration-200 { transition-duration: 200ms; }
+        .duration-300 { transition-duration: 300ms; }
+        .border-gray-300 { border-color: #d1d5db; }
+        .group\/city { }
+        .group\/link { }
+        .bg-animated { display: none; } /* removed blobs */
+
+        /* Responsive header layout */
+        @media (min-width: 1024px) {
+            .lg\:flex-row { flex-direction: row; }
+        }
+
+        /* Alpine transition helpers - needed for modals */
+        [x-cloak] { display: none !important; }
+
+        /* Focus ring */
+        :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+        input:focus, select:focus, textarea:focus { outline: none; box-shadow: 0 0 0 2px rgba(124,107,250,0.25); }
+
+        /* Modal overlay */
+        .fixed.inset-0 { position: fixed; top: 0; right: 0; bottom: 0; left: 0; }
+
+        /* Text muted helper */
+        .text-gray-900 { color: #111827; }
+
+        /* Overflow */
+        .overflow-x-hidden { overflow-x: hidden; }
+    </style>
+</head>
+<body class="theme-transition min-h-screen overflow-x-hidden"
+      :class="{
+          'dark dark-bg text-white': currentTheme === 'dark',
+          'light light-bg text-gray-900': currentTheme === 'light',
+          'dark dark-bg text-white': currentTheme === 'custom'
+      }"
+      x-data="dashboardApp()"
+      x-init="initApp()"
+      x-effect="onLanguageChange()">
+
+    <!-- Subtle accent band at top -->
+    <div style="position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7c6bfa,#c084fc,#f472b6);opacity:0.7;z-index:100;pointer-events:none;"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="relative z-10 container mx-auto px-3 py-4 lg:px-6 lg:py-8 max-w-[1600px]">
+
+        <!-- HEADER -->
+        <header class="glass-header theme-transition p-5 lg:p-7 mb-5 lg:mb-7 relative z-30">
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div class="flex-1">
+                    <h1 class="text-2xl lg:text-[2.2rem] font-semibold tracking-tight">
+                        <span x-text="t.greeting"></span>, <span style="color:var(--accent)" x-text="userName"></span>
+                    </h1>
+                    <p class="mt-1.5 flex items-center gap-2 text-sm opacity-55 font-light tracking-wide">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 opacity-70"></i>
+                        <span x-text="currentDate"></span>
+                        <span class="opacity-30">•</span>
+                        <span x-text="currentTime" class="font-mono text-xs tracking-widest"></span>
+                    </p>
+                </div>
+
+                <!-- CONTROLS -->
+                <div class="flex flex-wrap items-center gap-2 lg:gap-3">
+
+                    <!-- Language selector -->
+                    <div class="relative">
+                        <button @click="showLangMenu = !showLangMenu"
+                                class="glass-btn flex items-center gap-2 px-3 py-2 rounded-xl touch-target text-sm">
+                            <span class="text-base" x-text="flags[currentLang]"></span>
+                            <span class="text-xs uppercase hidden sm:inline tracking-widest opacity-70" x-text="currentLang"></span>
+                            <i data-lucide="chevron-down" class="w-3.5 h-3.5 opacity-50"></i>
+                        </button>
+                        <div x-show="showLangMenu" @click.away="showLangMenu = false"
+                             class="glass-dropdown absolute right-0 mt-2 w-44 z-50"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95">
+                            <div class="py-1">
+                                <template x-for="lang in ['es', 'en', 'de', 'zh', 'pl']">
+                                    <button @click="changeLang(lang)"
+                                            class="glass-dropdown-item w-full text-left flex items-center gap-3 text-sm">
+                                        <span x-text="flags[lang]"></span>
+                                        <span class="opacity-80" x-text="langNames[lang]"></span>
+                                        <i data-lucide="check" class="w-3 h-3 ml-auto text-purple-400" x-show="currentLang === lang"></i>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme pill -->
+                    <div class="glass-pill">
+                        <button @click="setTheme('light')"
+                                class="glass-pill-btn touch-target"
+                                :class="currentTheme === 'light' ? 'active text-amber-400' : 'opacity-40 hover:opacity-70'">
+                            <i data-lucide="sun" class="w-4 h-4"></i>
+                        </button>
+                        <button @click="setTheme('dark')"
+                                class="glass-pill-btn touch-target"
+                                :class="currentTheme === 'dark' ? 'active text-violet-300' : 'opacity-40 hover:opacity-70'">
+                            <i data-lucide="moon" class="w-4 h-4"></i>
+                        </button>
+                        <button @click="setTheme('custom'); showColorPicker = true"
+                                class="glass-pill-btn touch-target"
+                                :class="currentTheme === 'custom' ? 'active' : 'opacity-40 hover:opacity-70'">
+                            <i data-lucide="palette" class="w-4 h-4" :class="currentTheme === 'custom' ? 'text-pink-400' : ''"></i>
+                        </button>
+                    </div>
+
+                    <!-- Settings -->
+                    <button @click="showSettings = true"
+                            class="glass-btn p-2.5 rounded-xl touch-target opacity-75 hover:opacity-100">
+                        <i data-lucide="settings" class="w-4.5 h-4.5"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- WIDGET GRID -->
+        <div x-ref="widgetGrid" class="dashboard-grid">
+            <template x-for="(widget, index) in activeWidgets" :key="widget.id">
+                <div :class="[widget.size === 'large' ? 'widget-span-2' : '', widget.tall ? 'widget-span-rows-2' : '']"
+                     class="glass-widget theme-transition p-4 lg:p-5 group relative">
+
+                    <!-- Prism edge -->
+                    <div class="prism-edge"></div>
+
+                    <!-- Drag handle -->
+                    <div class="drag-handle">
+                        <i data-lucide="grip-vertical" class="w-4 h-4 opacity-60"></i>
+                    </div>
+
+                    <!-- Widget content (z-index above pseudo-elements) -->
+                    <div class="relative z-10" x-html="renderWidget(widget)"></div>
+                </div>
+            </template>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div x-show="activeWidgets.length === 0" class="text-center py-24">
+            <div class="glass-widget inline-block p-8 rounded-3xl">
+                <i data-lucide="layout-grid" class="w-14 h-14 mx-auto mb-4 opacity-25"></i>
+                <p class="text-base opacity-50 mb-4" x-text="t.noWidgets"></p>
+                <button @click="showSettings = true" class="glass-btn-accent px-6 py-2.5 text-sm font-medium text-white">
+                    <span x-text="t.addWidgets"></span>
+                </button>
+            </div>
+        </div>
+
+        <footer class="mt-10 text-center text-xs opacity-25 tracking-wider font-light">
+            <p x-text="t.footer"></p>
+        </footer>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div x-show="showSettings"
+         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="glass-modal w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+             @click.away="showSettings = false"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+             x-transition:enter-end="opacity-100 scale-100 translate-y-0">
+
+            <div class="relative z-10 p-6 border-b sticky top-0 backdrop-blur-xl rounded-t-[28px]"
+                 :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'border-white/10 bg-slate-950/60' : 'border-black/06 bg-white/70'">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold tracking-tight" x-text="t.settings"></h2>
+                    <button @click="showSettings = false"
+                            class="glass-btn p-2 rounded-xl opacity-60 hover:opacity-100">
+                        <i data-lucide="x" class="w-4.5 h-4.5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="relative z-10 p-6 space-y-7">
+                <!-- Widget selector -->
+                <div>
+                    <h3 class="text-sm font-semibold mb-4 flex items-center gap-2 opacity-60 uppercase tracking-widest">
+                        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                        <span x-text="t.availableWidgets"></span>
+                    </h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <template x-for="widget in availableWidgets" :key="widget.id">
+                            <label class="glass-setting-row flex items-center gap-3 p-3 cursor-pointer"
+                                   :class="isWidgetActive(widget.id) ? 'active' : ''">
+                                <input type="checkbox"
+                                       :checked="isWidgetActive(widget.id)"
+                                       @change="toggleWidget(widget.id)"
+                                       class="w-4 h-4 rounded border-gray-300 accent-purple-500">
+                                <div class="flex-1">
+                                    <p class="font-medium text-sm" x-text="widget.name"></p>
+                                    <p class="text-xs opacity-45 mt-0.5" x-text="widget.description"></p>
+                                </div>
+                            </label>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Name input -->
+                <div>
+                    <h3 class="text-sm font-semibold mb-3 flex items-center gap-2 opacity-60 uppercase tracking-widest">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                        <span x-text="t.personalization"></span>
+                    </h3>
+                    <input type="text" x-model="userName"
+                           class="glass-input w-full px-4 py-3 text-sm"
+                           :placeholder="t.yourName">
+                </div>
+
+                <!-- Reset -->
+                <div class="pt-4 border-t" :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'border-white/08' : 'border-black/06'">
+                    <button @click="resetAllData()"
+                            class="glass-btn-danger w-full py-3 rounded-xl font-medium flex items-center justify-center gap-2 text-sm">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <span>Restablecer todos los datos</span>
+                    </button>
+                    <p class="text-xs text-center mt-2 opacity-35 font-light">Esto eliminará todas las tareas, hábitos, notas y configuraciones guardadas</p>
+                </div>
+            </div>
+
+            <div class="relative z-10 p-6 border-t sticky bottom-0 backdrop-blur-xl rounded-b-[28px]"
+                 :class="currentTheme === 'dark' || currentTheme === 'custom' ? 'border-white/10 bg-slate-950/60' : 'border-black/06 bg-white/70'">
+                <button @click="localStorage.setItem('userName', userName); localStorage.setItem('lang', currentLang); localStorage.setItem('theme', currentTheme); localStorage.setItem('customColors', JSON.stringify(customColors)); showSettings = false"
+                        class="glass-btn-accent w-full py-3 text-white font-medium text-sm rounded-xl">
+                    <span x-text="t.save"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- COLOR PICKER MODAL -->
+    <div x-show="showColorPicker"
+         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         x-transition.opacity>
+        <div class="glass-modal w-full max-w-md p-7 relative z-10"
+             @click.away="showColorPicker = false"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100">
+
+            <div class="relative z-10">
+                <h3 class="text-xl font-semibold mb-5 tracking-tight" x-text="t.customColors"></h3>
+
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-xs mb-3 opacity-50 uppercase tracking-widest" x-text="t.primaryColor"></label>
+                        <div class="flex gap-2.5 flex-wrap">
+                            <template x-for="color in colorPresets" :key="color">
+                                <button @click="customColors.primary = color"
+                                        class="w-9 h-9 rounded-full transition-all"
+                                        :class="customColors.primary === color ? 'scale-110 ring-2 ring-white/60 ring-offset-2 ring-offset-transparent' : 'opacity-70 hover:opacity-100'"
+                                        :style="`background: ${color}; box-shadow: 0 2px 8px ${color}55`"></button>
+                            </template>
+                            <input type="color" x-model="customColors.primary"
+                                   class="w-9 h-9 rounded-full overflow-hidden cursor-pointer border-none bg-transparent">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs mb-3 opacity-50 uppercase tracking-widest" x-text="t.secondaryColor"></label>
+                        <div class="flex gap-2.5 flex-wrap">
+                            <template x-for="color in colorPresets" :key="color">
+                                <button @click="customColors.secondary = color"
+                                        class="w-9 h-9 rounded-full transition-all"
+                                        :class="customColors.secondary === color ? 'scale-110 ring-2 ring-white/60 ring-offset-2 ring-offset-transparent' : 'opacity-70 hover:opacity-100'"
+                                        :style="`background: ${color}; box-shadow: 0 2px 8px ${color}55`"></button>
+                            </template>
+                            <input type="color" x-model="customColors.secondary"
+                                   class="w-9 h-9 rounded-full overflow-hidden cursor-pointer border-none bg-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-7">
+                    <button @click="showColorPicker = false"
+                            class="glass-btn-accent flex-1 py-3 text-white text-sm font-medium rounded-xl" x-text="t.apply">
+                    </button>
+                    <button @click="showColorPicker = false; setTheme('dark')"
+                            class="glass-btn px-5 py-3 text-sm rounded-xl opacity-60 hover:opacity-100" x-text="t.cancel">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======== ALL SCRIPTS (unchanged logic) ======== -->
+    <script>
+        window.chartInstances = {};
+        window.previousLang = localStorage.getItem('lang') || 'es';
+
+        const translations = {
+            es: {
+                greeting: (h) => h < 12 ? 'Buenos días' : h < 18 ? 'Buenas tardes' : 'Buenas noches',
+                settings: 'Configuración', availableWidgets: 'Widgets Disponibles',
+                personalization: 'Personalización', yourName: 'Tu nombre', save: 'Guardar Cambios',
+                noWidgets: 'No hay widgets activos', addWidgets: 'Agregar Widgets',
+                customColors: 'Colores Personalizados', primaryColor: 'Color Primario',
+                secondaryColor: 'Color Secundario', apply: 'Aplicar', cancel: 'Cancelar',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Restablecer', clearCompleted: 'Limpiar completados',
+                quote: 'Cita del Día', word: 'Palabra del Día', water: 'Hidratación', steps: 'Pasos',
+                pomodoro: 'Pomodoro', calculator: 'Calculadora', calendar: 'Calendario',
+                breathing: 'Respiración', tasks: 'Tareas', notes: 'Notas Rápidas',
+                kanban: 'Kanban Board', analytics: 'Análisis', expenses: 'Gastos',
+                sleep: 'Sueño', mood: 'Estado de Ánimo', habits: 'Hábitos',
+                links: 'Accesos Rápidos', shopping: 'Lista de Compras', reading: 'Lectura', clock: 'Reloj Mundial'
+            },
+            en: {
+                greeting: (h) => h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening',
+                settings: 'Settings', availableWidgets: 'Available Widgets',
+                personalization: 'Personalization', yourName: 'Your name', save: 'Save Changes',
+                noWidgets: 'No active widgets', addWidgets: 'Add Widgets',
+                customColors: 'Custom Colors', primaryColor: 'Primary Color',
+                secondaryColor: 'Secondary Color', apply: 'Apply', cancel: 'Cancel',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Reset', clearCompleted: 'Clear completed',
+                quote: 'Daily Quote', word: 'Word of the Day', water: 'Hydration', steps: 'Steps',
+                pomodoro: 'Pomodoro', calculator: 'Calculator', calendar: 'Calendar',
+                breathing: 'Breathing', tasks: 'Tasks', notes: 'Quick Notes',
+                kanban: 'Kanban Board', analytics: 'Analytics', expenses: 'Expenses',
+                sleep: 'Sleep', mood: 'Mood Tracker', habits: 'Habits',
+                links: 'Quick Links', shopping: 'Shopping List', reading: 'Reading List', clock: 'World Clock'
+            },
+            de: {
+                greeting: (h) => h < 12 ? 'Guten Morgen' : h < 18 ? 'Guten Tag' : 'Guten Abend',
+                settings: 'Einstellungen', availableWidgets: 'Verfügbare Widgets',
+                personalization: 'Personalisierung', yourName: 'Dein Name', save: 'Änderungen Speichern',
+                noWidgets: 'Keine aktiven Widgets', addWidgets: 'Widgets Hinzufügen',
+                customColors: 'Benutzerdefinierte Farben', primaryColor: 'Primärfarbe',
+                secondaryColor: 'Sekundärfarbe', apply: 'Anwenden', cancel: 'Abbrechen',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Zurücksetzen', clearCompleted: 'Abgeschlossene löschen',
+                quote: 'Tägliches Zitat', word: 'Wort des Tages', water: 'Hydration', steps: 'Schritte',
+                pomodoro: 'Pomodoro', calculator: 'Taschenrechner', calendar: 'Kalender',
+                breathing: 'Atmung', tasks: 'Aufgaben', notes: 'Notizen',
+                kanban: 'Kanban Board', analytics: 'Analysen', expenses: 'Ausgaben',
+                sleep: 'Schlaf', mood: 'Stimmung', habits: 'Gewohnheiten',
+                links: 'Schnelllinks', shopping: 'Einkaufsliste', reading: 'Leseliste', clock: 'Weltuhr'
+            },
+            zh: {
+                greeting: (h) => h < 12 ? '早上好' : h < 18 ? '下午好' : '晚上好',
+                settings: '设置', availableWidgets: '可用小部件',
+                personalization: '个性化', yourName: '你的名字', save: '保存更改',
+                noWidgets: '没有活动的小部件', addWidgets: '添加小部件',
+                customColors: '自定义颜色', primaryColor: '主色', secondaryColor: '副色',
+                apply: '应用', cancel: '取消', footer: 'Dashboard Ultimate Pro • 液态玻璃版',
+                reset: '重置', clearCompleted: '清除已完成',
+                quote: '每日名言', word: '每日一词', water: '饮水', steps: '步数',
+                pomodoro: '番茄钟', calculator: '计算器', calendar: '日历',
+                breathing: '呼吸', tasks: '任务', notes: '快速笔记',
+                kanban: '看板', analytics: '分析', expenses: '支出',
+                sleep: '睡眠', mood: '心情', habits: '习惯',
+                links: '快速链接', shopping: '购物清单', reading: '阅读清单', clock: '世界时钟'
+            },
+            pl: {
+                greeting: (h) => h < 12 ? 'Dzień dobry' : h < 18 ? 'Dzień dobry' : 'Dobry wieczór',
+                settings: 'Ustawienia', availableWidgets: 'Dostępne Widgety',
+                personalization: 'Personalizacja', yourName: 'Twoje imię', save: 'Zapisz Zmiany',
+                noWidgets: 'Brak aktywnych widgetów', addWidgets: 'Dodaj Widgety',
+                customColors: 'Niestandardowe Kolory', primaryColor: 'Kolor Podstawowy',
+                secondaryColor: 'Kolor Drugorzędny', apply: 'Zastosuj', cancel: 'Anuluj',
+                footer: 'Dashboard Ultimate Pro • Liquid Glass Edition',
+                reset: 'Resetuj', clearCompleted: 'Wyczyść zakończone',
+                quote: 'Cytat Dnia', word: 'Słowo Dnia', water: 'Nawodnienie', steps: 'Kroki',
+                pomodoro: 'Pomodoro', calculator: 'Kalkulator', calendar: 'Kalendarz',
+                breathing: 'Oddychanie', tasks: 'Zadania', notes: 'Notatki',
+                kanban: 'Tablica Kanban', analytics: 'Analiza', expenses: 'Wydatki',
+                sleep: 'Sen', mood: 'Nastrój', habits: 'Nawyki',
+                links: 'Szybkie Linki', shopping: 'Lista Zakupów', reading: 'Lista Czytelnicza', clock: 'Zegar Światowy'
+            }
+        };
+
+        function dashboardApp() {
+            return {
+                currentLang: localStorage.getItem('lang') || 'es',
+                currentTheme: localStorage.getItem('theme') || 'dark',
+                userName: localStorage.getItem('userName') || 'Usuario',
+                showSettings: false,
+                showLangMenu: false,
+                showColorPicker: false,
+                currentDate: '',
+                currentTime: '',
+                customColors: { primary: '#6366f1', secondary: '#ec4899', accent: '#8b5cf6' },
+                colorPresets: ['#6366f1','#ec4899','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#14b8a6'],
+                flags: { es:'🇪🇸', en:'🇬🇧', de:'🇩🇪', zh:'🇨🇳', pl:'🇵🇱' },
+                langNames: { es:'Español', en:'English', de:'Deutsch', zh:'中文', pl:'Polski' },
+                availableWidgets: [
+                    { id:'quote', name:'Cita del Día', description:'Inspiración diaria', size:'normal' },
+                    { id:'word', name:'Palabra del Día', description:'Aprende vocabulario', size:'normal' },
+                    { id:'water', name:'Hidratación', description:'Seguimiento de agua', size:'normal' },
+                    { id:'steps', name:'Pasos', description:'Contador de pasos', size:'normal' },
+                    { id:'pomodoro', name:'Pomodoro', description:'Temporizador focus', size:'normal' },
+                    { id:'calculator', name:'Calculadora', description:'Calculadora rápida', size:'normal' },
+                    { id:'calendar', name:'Calendario', description:'Calendario mensual', size:'normal' },
+                    { id:'breathing', name:'Respiración', description:'Ejercicios de respiración', size:'normal' },
+                    { id:'tasks', name:'Tareas', description:'Lista de tareas', size:'normal', tall:true },
+                    { id:'notes', name:'Notas Rápidas', description:'Bloc de notas', size:'normal', tall:true },
+                    { id:'kanban', name:'Kanban Board', description:'Tablero de tareas', size:'large', tall:true },
+                    { id:'analytics', name:'Análisis', description:'Gráficos de productividad', size:'large' },
+                    { id:'expenses', name:'Gastos', description:'Control de gastos', size:'normal' },
+                    { id:'sleep', name:'Sueño', description:'Análisis de sueño', size:'large', tall:true },
+                    { id:'mood', name:'Estado de Ánimo', description:'Tracker de humor', size:'large' },
+                    { id:'habits', name:'Hábitos', description:'Seguimiento de hábitos', size:'large' },
+                    { id:'links', name:'Accesos Rápidos', description:'Links favoritos', size:'large' },
+                    { id:'shopping', name:'Lista de Compras', description:'Lista de compras', size:'normal', tall:true },
+                    { id:'reading', name:'Lectura', description:'Lista de lectura', size:'normal', tall:true },
+                    { id:'clock', name:'Reloj Mundial', description:'Horarios globales', size:'large' }
+                ],
+                activeWidgets: [],
+                widgetData: {},
+
+                initApp() {
+                    const savedWidgets = localStorage.getItem('activeWidgets');
+                    if (savedWidgets) {
+                        this.activeWidgets = JSON.parse(savedWidgets);
+                    } else {
+                        this.activeWidgets = [
+                            { id:'quote', size:'normal' },
+                            { id:'tasks', size:'normal', tall:true },
+                            { id:'kanban', size:'large', tall:true },
+                            { id:'analytics', size:'large' },
+                            { id:'pomodoro', size:'normal' },
+                            { id:'clock', size:'large' }
+                        ];
+                    }
+                    const savedWidgetData = localStorage.getItem('widgetData');
+                    if (savedWidgetData) this.widgetData = JSON.parse(savedWidgetData);
+                    window._widgetDataCache = Object.assign({}, this.widgetData);
+
+                    const savedColors = localStorage.getItem('customColors');
+                    if (savedColors) this.customColors = JSON.parse(savedColors);
+
+                    this.$watch('userName', v => localStorage.setItem('userName', v));
+                    this.$watch('customColors', v => {
+                        localStorage.setItem('customColors', JSON.stringify(v));
+                        if (this.currentTheme === 'custom') {
+                            document.documentElement.style.setProperty('--custom-primary', v.primary);
+                            document.documentElement.style.setProperty('--custom-secondary', v.secondary);
+                        }
+                    }, { deep: true });
+                    this.$watch('activeWidgets', () => this.saveWidgets(), { deep: true });
+
+                    window._saveWidgetData = (id, data) => this.saveWidgetData(id, data);
+                    this._setupRebuildHelper();
+                    this.updateDateTime();
+                    setInterval(() => this.updateDateTime(), 1000);
+
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        this.initSortable();
+                        setTimeout(() => this.initCharts(), 100);
+                    });
+
+                    window.previousLang = this.currentLang;
+                },
+
+                saveWidgetData(widgetId, data) {
+                    if (!window._widgetDataCache) window._widgetDataCache = {};
+                    window._widgetDataCache[widgetId] = data;
+                    localStorage.setItem('widgetData', JSON.stringify(window._widgetDataCache));
+                },
+
+                getWidgetData(widgetId, defaultData) {
+                    const cache = window._widgetDataCache || {};
+                    return (cache[widgetId] !== undefined) ? cache[widgetId] : defaultData;
+                },
+
+                onLanguageChange() {
+                    if (this.currentLang !== window.previousLang) {
+                        this.$nextTick(() => {
+                            setTimeout(() => { lucide.createIcons(); this.reinitCharts(); }, 50);
+                        });
+                        window.previousLang = this.currentLang;
+                    }
+                },
+
+                initSortable() {
+                    const grid = this.$refs.widgetGrid;
+                    if (!grid) return;
+                    Sortable.create(grid, {
+                        animation: 200,
+                        handle: '.drag-handle',
+                        ghostClass: 'sortable-ghost',
+                        dragClass: 'sortable-drag',
+                        onEnd: (evt) => {
+                            const item = this.activeWidgets.splice(evt.oldIndex, 1)[0];
+                            this.activeWidgets.splice(evt.newIndex, 0, item);
+                            this.saveWidgets();
+                        }
+                    });
+                },
+
+                get t() {
+                    const hour = new Date().getHours();
+                    const trans = translations[this.currentLang];
+                    return { ...trans, greeting: trans.greeting(hour) };
+                },
+
+                changeLang(lang) {
+                    this.currentLang = lang;
+                    localStorage.setItem('lang', lang);
+                    document.documentElement.lang = lang;
+                    this.showLangMenu = false;
+                },
+
+                setTheme(theme) {
+                    this.currentTheme = theme;
+                    localStorage.setItem('theme', theme);
+                    const root = document.documentElement;
+                    if (theme === 'custom') {
+                        root.style.setProperty('--custom-primary', this.customColors.primary);
+                        root.style.setProperty('--custom-secondary', this.customColors.secondary);
+                        root.style.setProperty('--accent', this.customColors.primary);
+                    } else {
+                        root.style.setProperty('--accent', '#7c6bfa');
+                        root.style.removeProperty('--custom-primary');
+                        root.style.removeProperty('--custom-secondary');
+                    }
+                    this.$nextTick(() => { setTimeout(() => this.reinitCharts(), 100); });
+                },
+
+                isWidgetActive(id) { return this.activeWidgets.some(w => w.id === id); },
+
+                toggleWidget(id) {
+                    const index = this.activeWidgets.findIndex(w => w.id === id);
+                    if (index > -1) {
+                        this.activeWidgets.splice(index, 1);
+                    } else {
+                        const widget = this.availableWidgets.find(w => w.id === id);
+                        if (widget) this.activeWidgets.push({ id: widget.id, size: widget.size, tall: widget.tall });
+                    }
+                    this.saveWidgets();
+                    this.$nextTick(() => {
+                        lucide.createIcons();
+                        setTimeout(() => this.initCharts(), 100);
+                    });
+                },
+
+                saveWidgets() { localStorage.setItem('activeWidgets', JSON.stringify(this.activeWidgets)); },
+
+                resetAllData() {
+                    if (confirm('¿Estás seguro de que quieres eliminar todos los datos? Esta acción no se puede deshacer.')) {
+                        localStorage.removeItem('widgetData');
+                        localStorage.removeItem('activeWidgets');
+                        localStorage.removeItem('userName');
+                        localStorage.removeItem('customColors');
+                        this.widgetData = {};
+                        this.activeWidgets = [
+                            { id:'quote', size:'normal' }, { id:'tasks', size:'normal', tall:true },
+                            { id:'kanban', size:'large', tall:true }, { id:'analytics', size:'large' },
+                            { id:'pomodoro', size:'normal' }, { id:'clock', size:'large' }
+                        ];
+                        this.userName = 'Usuario';
+                        this.customColors = { primary:'#6366f1', secondary:'#ec4899', accent:'#8b5cf6' };
+                        this.saveWidgets();
+                        location.reload();
+                    }
+                },
+
+                updateDateTime() {
+                    const now = new Date();
+                    const localeMap = { es:'es-ES', en:'en-US', de:'de-DE', zh:'zh-CN', pl:'pl-PL' };
+                    const locale = localeMap[this.currentLang] || 'es-ES';
+                    this.currentDate = now.toLocaleDateString(locale, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+                    this.currentTime = now.toLocaleTimeString(locale, { hour:'2-digit', minute:'2-digit' });
+                },
+
+                renderWidget(widget) {
+                    const widgets = {
+                        quote: this.quoteTemplate(),
+                        word: this.wordTemplate(),
+                        water: this.waterTemplate(),
+                        steps: this.stepsTemplate(),
+                        pomodoro: this.pomodoroTemplate(),
+                        calculator: this.calculatorTemplate(),
+                        calendar: this.calendarTemplate(),
+                        breathing: this.breathingTemplate(),
+                        tasks: this.tasksTemplate(),
+                        notes: this.notesTemplate(),
+                        kanban: this.kanbanTemplate(),
+                        analytics: this.analyticsTemplate(),
+                        expenses: this.expensesTemplate(),
+                        sleep: this.sleepTemplate(),
+                        mood: this.moodTemplate(),
+                        habits: this.habitsTemplate(),
+                        links: this.linksTemplate(),
+                        shopping: this.shoppingTemplate(),
+                        reading: this.readingTemplate(),
+                        clock: this.clockTemplate()
+                    };
+                    return widgets[widget.id] || '';
+                },
+
+                quoteTemplate() {
+                    const savedQuote = this.getWidgetData('quote', { text:'El éxito es la suma de pequeños esfuerzos repetidos.', author:'Robert Collier' });
+                    return `<div x-data="{quote: ${JSON.stringify(savedQuote).replace(/"/g,'&quot;')}}" x-init="$watch('quote', v => window._saveWidgetData('quote', v))">
+                        <div class="flex items-center gap-2 mb-3 pr-8">
+                            <i data-lucide="quote" class="w-4 h-4 text-yellow-400 opacity-80"></i>
+                            <h3 class="font-semibold text-sm tracking-tight">${this.t.quote}</h3>
+                        </div>
+                        <p class="text-sm opacity-72 italic leading-relaxed font-light" x-text="quote.text"></p>
+                        <p class="text-xs opacity-40 mt-2.5 font-medium" x-text="'— ' + quote.author"></p>
+                    </div>`;
+                },
+
+                wordTemplate() {
+                    const savedWord = this.getWidgetData('word', { word:'Serendipia', meaning:'Hallazgo valioso por casualidad', lang:'ES' });
+                    return `<div x-data="{currentWord: ${JSON.stringify(savedWord).replace(/"/g,'&quot;')}}" x-init="$watch('currentWord', v => window._saveWidgetData('word', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="languages" class="w-4 h-4 text-cyan-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.word}</h3>
+                            </div>
+                            <span class="text-xs bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/20 font-medium" x-text="currentWord.lang"></span>
+                        </div>
+                        <p class="text-xl font-semibold text-cyan-400 tracking-tight" x-text="currentWord.word"></p>
+                        <p class="text-xs opacity-50 mt-1.5 font-light" x-text="currentWord.meaning"></p>
+                    </div>`;
+                },
+
+                waterTemplate() {
+                    const savedGlasses = this.getWidgetData('water', 0);
+                    return `<div x-data="{glasses: ${savedGlasses}}" x-init="$watch('glasses', v => window._saveWidgetData('water', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="droplets" class="w-4 h-4 text-blue-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.water}</h3>
+                            </div>
+                            <span class="text-xs opacity-40 font-mono" x-text="glasses + '/8'"></span>
+                        </div>
+                        <div class="flex justify-center py-2">
+                            <button @click="glasses < 8 ? glasses++ : ''"
+                                    class="w-16 h-16 rounded-full flex items-center justify-center transition-all"
+                                    style="background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.25);border-top-color:rgba(255,255,255,0.15);box-shadow:0 1px 0 rgba(255,255,255,0.12) inset, 0 4px 12px rgba(59,130,246,0.20)">
+                                <i data-lucide="glass-water" class="w-7 h-7 text-blue-400"></i>
+                            </button>
+                        </div>
+                        <div class="flex gap-2 mt-2">
+                            <button @click="glasses = Math.max(0, glasses - 1)"
+                                    class="flex-1 rounded-xl py-1.5 text-xs transition-all"
+                                    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">−</button>
+                            <button @click="glasses = 0"
+                                    class="px-3 rounded-xl text-xs transition-all"
+                                    style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                },
+
+                stepsTemplate() {
+                    const savedSteps = this.getWidgetData('steps', 6432);
+                    return `<div x-data="{steps: ${savedSteps}}" x-init="$watch('steps', v => window._saveWidgetData('steps', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="footprints" class="w-4 h-4 text-orange-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.steps}</h3>
+                            </div>
+                            <button @click="steps = 0" class="action-btn reset text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                <span class="hidden sm:inline">${this.t.reset}</span>
+                            </button>
+                        </div>
+                        <div class="text-center py-2">
+                            <p class="text-3xl font-semibold tracking-tighter" x-text="steps.toLocaleString()"></p>
+                            <p class="text-xs opacity-35 mt-1 font-light">Meta: 10,000</p>
+                        </div>
+                        <div class="h-1.5 rounded-full overflow-hidden mt-2" style="background:rgba(255,255,255,0.08)">
+                            <div class="h-full rounded-full transition-all" style="background:linear-gradient(90deg,#fb923c,#ef4444)"
+                                 :style="'width: ' + Math.min(100, steps/100) + '%'"></div>
+                        </div>
+                        <button @click="steps += 500"
+                                class="w-full mt-3 rounded-xl py-1.5 text-xs font-medium transition-all"
+                                style="background:rgba(251,146,60,0.18);border:1px solid rgba(251,146,60,0.25);border-top-color:rgba(255,255,255,0.14)">
+                            + 500
+                        </button>
+                    </div>`;
+                },
+
+                pomodoroTemplate() {
+                    const savedPomodoro = this.getWidgetData('pomodoro', { time:25*60, mode:'work' });
+                    return `<div x-data="{time: ${savedPomodoro.time}, running: false, mode: '${savedPomodoro.mode}'}"
+                         x-init="setInterval(() => { if(running && time > 0) time-- }, 1000); $watch('time', v => window._saveWidgetData('pomodoro', {time: v, mode: mode})); $watch('mode', v => window._saveWidgetData('pomodoro', {time: time, mode: v}))">
+                        <div class="flex items-center justify-between mb-2 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="timer" class="w-4 h-4 text-red-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.pomodoro}</h3>
+                            </div>
+                            <div class="flex gap-1">
+                                <button @click="mode='work'; time=25*60; running=false"
+                                        class="px-2 py-0.5 text-[10px] rounded-lg font-medium transition-all"
+                                        :style="mode === 'work' ? 'background:rgba(239,68,68,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35)' : 'background:rgba(255,255,255,0.08);border:1px solid transparent'">25</button>
+                                <button @click="mode='break'; time=5*60; running=false"
+                                        class="px-2 py-0.5 text-[10px] rounded-lg font-medium transition-all"
+                                        :style="mode === 'break' ? 'background:rgba(34,197,94,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35)' : 'background:rgba(255,255,255,0.08);border:1px solid transparent'">5</button>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-20 h-20">
+                                <svg class="w-full h-full transform -rotate-90">
+                                    <circle cx="40" cy="40" r="32" stroke="rgba(255,255,255,0.07)" stroke-width="4" fill="none"/>
+                                    <circle cx="40" cy="40" r="32" :stroke="mode === 'work' ? '#ef4444' : '#22c55e'"
+                                            stroke-width="4" fill="none" stroke-linecap="round"
+                                            :stroke-dasharray="201"
+                                            :stroke-dashoffset="201 - (201 * (mode === 'work' ? (25*60-time)/(25*60) : (5*60-time)/(5*60)))"/>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="text-lg font-mono font-semibold tabular-nums"
+                                          x-text="Math.floor(time/60).toString().padStart(2,'0') + ':' + (time%60).toString().padStart(2,'0')"></span>
+                                </div>
+                            </div>
+                            <button @click="running = !running"
+                                    class="mt-2 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                                    style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);border-top-color:rgba(255,255,255,0.30);box-shadow:0 1px 0 rgba(255,255,255,0.14) inset">
+                                <i :data-lucide="running ? 'pause' : 'play'" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>`;
+                },
+
+                calculatorTemplate() {
+                    return `<div x-data="{current: '', prev: '', op: null}">
+                        <div class="flex items-center gap-2 mb-2 pr-8">
+                            <i data-lucide="calculator" class="w-4 h-4 opacity-40"></i>
+                            <h3 class="font-semibold text-sm tracking-tight">${this.t.calculator}</h3>
+                        </div>
+                        <div class="rounded-xl p-3 mb-2 text-right" style="background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.04)">
+                            <p class="text-xs opacity-35 font-mono h-4" x-text="prev + (op || '')"></p>
+                            <p class="text-xl font-mono font-semibold" x-text="current || '0'"></p>
+                        </div>
+                        <div class="grid grid-cols-4 gap-1">
+                            <template x-for="btn in ['C','÷','×','⌫','7','8','9','-','4','5','6','+','1','2','3','=']">
+                                <button @click="if(btn==='C'){current='';prev='';op=null}else if(['+','-','×','÷'].includes(btn)){op=btn;prev=current;current=''}else if(btn==='='){if(op && prev){current=eval(prev+op.replace('×','*').replace('÷','/')+current);prev='';op=null}}else if(btn==='⌫'){current=current.slice(0,-1)}else{current+=btn}"
+                                        class="calc-btn h-8 rounded-lg text-xs font-medium transition-all"
+                                        :style="btn === '=' ? 'background:rgba(139,92,246,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35);box-shadow:0 1px 0 rgba(255,255,255,0.16) inset' : 'background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)'"
+                                        x-text="btn"></button>
+                            </template>
+                            <button @click="current+='0'" class="calc-btn h-8 rounded-lg text-xs col-span-2" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)">0</button>
+                            <button @click="current+='.'" class="calc-btn h-8 rounded-lg text-xs" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06)">.</button>
+                            <button @click="if(op && prev){current=eval(prev+op.replace('×','*').replace('÷','/')+current);prev='';op=null}"
+                                    class="calc-btn h-8 rounded-lg text-xs" style="background:rgba(139,92,246,0.70);border:1px solid rgba(255,255,255,0.20);border-top-color:rgba(255,255,255,0.35)">=</button>
+                        </div>
+                    </div>`;
+                },
+
+                calendarTemplate() {
+                    return `<div x-data="{date: new Date(), selected: null}">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="calendar-days" class="w-4 h-4 text-violet-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight" x-text="date.toLocaleDateString('${this.currentLang === 'zh' ? 'zh-CN' : this.currentLang === 'de' ? 'de-DE' : this.currentLang === 'en' ? 'en-US' : this.currentLang === 'pl' ? 'pl-PL' : 'es-ES'}', {month:'long', year:'numeric'})"></h3>
+                            </div>
+                            <div class="flex gap-1">
+                                <button @click="date = new Date(date.getFullYear(), date.getMonth()-1, 1)" class="p-1 rounded-lg hover:bg-white/08 transition-all"><i data-lucide="chevron-left" class="w-3.5 h-3.5"></i></button>
+                                <button @click="date = new Date(date.getFullYear(), date.getMonth()+1, 1)" class="p-1 rounded-lg hover:bg-white/08 transition-all"><i data-lucide="chevron-right" class="w-3.5 h-3.5"></i></button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-[10px] opacity-35 mb-1 tracking-wider uppercase font-medium">
+                            <span>D</span><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span>
+                        </div>
+                        <div class="grid grid-cols-7 gap-1 text-center text-xs">
+                            <template x-for="d in Array.from({length: new Date(date.getFullYear(), date.getMonth()+1, 0).getDate()}, (_,i) => i+1)">
+                                <button class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-medium transition-all"
+                                        :class="d === new Date().getDate() && date.getMonth() === new Date().getMonth() ? 'text-white' : 'hover:bg-white/08 opacity-60'"
+                                        :style="d === new Date().getDate() && date.getMonth() === new Date().getMonth() ? 'background:rgba(139,92,246,0.70);box-shadow:0 1px 0 rgba(255,255,255,0.20) inset,0 2px 8px rgba(139,92,246,0.30)' : ''"
+                                        x-text="d"></button>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                breathingTemplate() {
+                    const inhale = this.currentLang==='es'?'Inhala...':this.currentLang==='en'?'Inhale...':this.currentLang==='de'?'Einatmen...':this.currentLang==='zh'?'吸气...':'Wdech...';
+                    const exhale = this.currentLang==='es'?'Exhala...':this.currentLang==='en'?'Exhale...':this.currentLang==='de'?'Ausatmen...':this.currentLang==='zh'?'呼气...':'Wydech...';
+                    const start  = this.currentLang==='es'?'Iniciar':this.currentLang==='en'?'Start':this.currentLang==='de'?'Start':this.currentLang==='zh'?'开始':'Start';
+                    const stop   = this.currentLang==='es'?'Detener':this.currentLang==='en'?'Stop':this.currentLang==='de'?'Stop':this.currentLang==='zh'?'停止':'Stop';
+                    return `<div x-data="{phase: false, running: false, _timer: null}"
+                         x-init="$watch('running', v => { clearInterval(_timer); if(v){ phase=false; _timer=setInterval(()=>{ phase=!phase }, 4000) } else { phase=false } })">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="wind" class="w-4 h-4 text-teal-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${this.t.breathing}</h3>
+                            </div>
+                            <button @click="running = !running"
+                                    class="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-medium transition-all"
+                                    :style="running ? 'background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.25);color:#f87171' : 'background:rgba(20,184,166,0.15);border:1px solid rgba(20,184,166,0.25);color:#2dd4bf'">
+                                <i :data-lucide="running ? 'square' : 'play'" class="w-3 h-3"></i>
+                                <span x-text="running ? '${stop}' : '${start}'"></span>
+                            </button>
+                        </div>
+                        <div class="flex flex-col items-center py-2">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center transition-all"
+                                 :class="running ? (phase ? 'scale-125 duration-[4000ms]' : 'scale-100 duration-[4000ms]') : 'scale-100'"
+                                 :style="running ? 'background:linear-gradient(135deg,rgba(45,212,191,0.40),rgba(56,189,248,0.35));border:1px solid rgba(255,255,255,0.18);border-top-color:rgba(255,255,255,0.35);box-shadow:0 1px 0 rgba(255,255,255,0.16) inset,0 8px 32px rgba(45,212,191,0.20)' : 'background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)'">
+                                <i data-lucide="flower-2" class="w-7 h-7 text-teal-300" :class="running ? '' : 'opacity-30'"></i>
+                            </div>
+                            <p class="text-sm font-medium mt-3 transition-all tracking-wide"
+                               :class="running ? 'opacity-80' : 'opacity-25'"
+                               x-text="running ? (phase ? '${exhale}' : '${inhale}') : '— —'"></p>
+                        </div>
+                    </div>`;
+                },
+
+                tasksTemplate() {
+                    const savedTasks = this.getWidgetData('tasks', [{text:'Revisar correos',done:true},{text:'Completar reporte',done:false}]);
+                    return `<div x-data="{tasks: ${JSON.stringify(savedTasks).replace(/"/g,'&quot;')}, newTask: ''}"
+                         x-init="$watch('tasks', v => window._saveWidgetData('tasks', v))">
+                        <div class="flex items-center justify-between mb-4 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.tasks}</h3>
+                            </div>
+                            <span class="text-xs opacity-35 font-mono" x-text="tasks.filter(t=>t.done).length + '/' + tasks.length"></span>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" x-model="newTask" @keydown.enter="if(newTask.trim()){tasks.push({text:newTask,done:false});newTask=''}"
+                                   placeholder="${this.currentLang==='es'?'Nueva tarea...':this.currentLang==='en'?'New task...':this.currentLang==='de'?'Neue Aufgabe...':this.currentLang==='zh'?'新任务...':'Nowe zadanie...'}"
+                                   class="glass-input flex-1 px-3 py-2 text-sm placeholder-white/25">
+                            <button @click="if(newTask.trim()){tasks.push({text:newTask,done:false});newTask=''}"
+                                    class="rounded-xl px-3 py-2 transition-all"
+                                    style="background:rgba(34,197,94,0.22);border:1px solid rgba(34,197,94,0.30);border-top-color:rgba(255,255,255,0.18)">
+                                <i data-lucide="plus" class="w-4 h-4 text-emerald-400"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                            <template x-for="(task, i) in tasks" :key="i">
+                                <div class="flex items-center gap-2 p-2 rounded-xl transition-all"
+                                     :style="task.done ? 'opacity:0.45' : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.10)'">
+                                    <button @click="task.done = !task.done"
+                                            class="w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                                            :style="task.done ? 'background:rgba(34,197,94,0.70);border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,0.20) inset' : 'border-color:rgba(255,255,255,0.25)'">
+                                        <i data-lucide="check" class="w-2.5 h-2.5 text-white" x-show="task.done"></i>
+                                    </button>
+                                    <span class="flex-1 text-sm font-light" :class="{'line-through opacity-50': task.done}" x-text="task.text"></span>
+                                    <button @click="tasks.splice(i,1)" class="action-btn delete w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                notesTemplate() {
+                    const savedNote = localStorage.getItem('widget_note') || '';
+                    return `<div x-data="{note: '${savedNote.replace(/'/g,"\\'")}', saved: false}"
+                         x-init="$watch('note', v => { localStorage.setItem('widget_note', v); saved=true; setTimeout(()=>saved=false, 1000) })">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="sticky-note" class="w-4 h-4 text-amber-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.notes}</h3>
+                            </div>
+                            <span class="text-xs text-emerald-400 font-medium" x-show="saved">✓ Saved</span>
+                        </div>
+                        <textarea x-model="note"
+                                  placeholder="${this.currentLang==='es'?'Escribe aquí...':this.currentLang==='en'?'Write here...':this.currentLang==='de'?'Hier schreiben...':this.currentLang==='zh'?'在这里写...':'Napisz tutaj...'}"
+                                  class="glass-input w-full h-40 p-3 text-sm resize-none font-light leading-relaxed placeholder-white/20"></textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs opacity-25 font-mono" x-text="note.length + ' chars'"></span>
+                            <button @click="note='';localStorage.removeItem('widget_note')" class="text-xs opacity-40 hover:text-red-400 hover:opacity-100 flex items-center gap-1 transition-all">
+                                <i data-lucide="trash" class="w-3 h-3"></i>
+                                ${this.currentLang==='es'?'Limpiar':this.currentLang==='en'?'Clear':this.currentLang==='de'?'Löschen':this.currentLang==='zh'?'清除':'Wyczyść'}
+                            </button>
+                        </div>
+                    </div>`;
+                },
+
+                kanbanTemplate() {
+                    const savedKanban = this.getWidgetData('kanban', { todo:['Diseñar logo','Revisar código'], doing:['Dashboard UI'], done:['Setup'] });
+                    const colNames = {
+                        todo: this.currentLang==='es'?'Por Hacer':this.currentLang==='en'?'To Do':this.currentLang==='de'?'Zu Tun':this.currentLang==='zh'?'待办':'Do Zrobienia',
+                        doing: this.currentLang==='es'?'En Progreso':this.currentLang==='en'?'In Progress':this.currentLang==='de'?'In Bearbeitung':this.currentLang==='zh'?'进行中':'W Trakcie',
+                        done: this.currentLang==='es'?'Hecho':this.currentLang==='en'?'Done':this.currentLang==='de'?'Fertig':this.currentLang==='zh'?'已完成':'Zrobione'
+                    };
+                    return `<div x-data="{cols: {todo: ${JSON.stringify(savedKanban.todo).replace(/"/g,'&quot;')}, doing: ${JSON.stringify(savedKanban.doing).replace(/"/g,'&quot;')}, done: ${JSON.stringify(savedKanban.done).replace(/"/g,'&quot;')}}, newTask: ''}"
+                         x-init="$watch('cols', v => window._saveWidgetData('kanban', v))">
+                        <div class="flex items-center justify-between mb-4 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="layout" class="w-4 h-4 text-indigo-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.kanban}</h3>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 h-48">
+                            <template x-for="(col, key) in [{name: '${colNames.todo}', key: 'todo'}, {name: '${colNames.doing}', key: 'doing'}, {name: '${colNames.done}', key: 'done'}]">
+                                <div class="rounded-2xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-top-color:rgba(255,255,255,0.12)">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-[10px] font-semibold tracking-wider uppercase opacity-50" x-text="col.name"></span>
+                                        <span class="text-[9px] bg-white/10 px-1.5 py-0.5 rounded-full font-mono" x-text="cols[col.key].length"></span>
+                                    </div>
+                                    <div class="space-y-1 overflow-y-auto max-h-28">
+                                        <template x-for="(task, ti) in cols[col.key]">
+                                            <div class="rounded-lg p-1.5 text-xs flex items-center justify-between group"
+                                                 style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.08)">
+                                                <span x-text="task" class="font-light"></span>
+                                                <button @click="cols[col.key].splice(ti, 1)" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-300 transition-opacity">
+                                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                                </button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <input type="text" x-model="newTask"
+                                           @keydown.enter="if(newTask.trim()){cols[col.key].push(newTask);newTask=''}"
+                                           class="w-full mt-1 bg-transparent text-xs placeholder-white/20 focus:outline-none font-light"
+                                           placeholder="+">
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                analyticsTemplate() {
+                    const chartId = 'chart-analytics-main';
+                    const savedAnalytics = this.getWidgetData('analytics', { data:[null,null,null,null,null,null,null], type:'bar' });
+                    const dayLabels = { es:['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'], en:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], de:['Mo','Di','Mi','Do','Fr','Sa','So'], zh:['一','二','三','四','五','六','日'], pl:['Pn','Wt','Śr','Cz','Pt','So','Nd'] };
+                    const labels = JSON.stringify(dayLabels[this.currentLang] || dayLabels.es);
+                    const statLabels = {
+                        avg: this.currentLang==='es'?'Promedio':this.currentLang==='en'?'Average':this.currentLang==='de'?'Durchschn.':this.currentLang==='zh'?'平均':'Śr.',
+                        best: this.currentLang==='es'?'Mejor':this.currentLang==='en'?'Best':this.currentLang==='de'?'Beste':this.currentLang==='zh'?'最佳':'Najl.',
+                        goodDays: this.currentLang==='es'?'Días≥7':this.currentLang==='en'?'Days≥7':this.currentLang==='de'?'Tage≥7':this.currentLang==='zh'?'天≥7':'Dni≥7',
+                        today: this.currentLang==='es'?'Productividad de hoy (1-10)':this.currentLang==='en'?"Today's productivity (1-10)":this.currentLang==='de'?'Heutige Produktivität (1-10)':this.currentLang==='zh'?'今日生产力(1-10)':'Produktywność dziś (1-10)',
+                        log: this.currentLang==='es'?'Registrar':this.currentLang==='en'?'Log':this.currentLang==='de'?'Eintragen':this.currentLang==='zh'?'记录':'Zapisz'
+                    };
+                    return `<div x-data="{
+                            chartData: ${JSON.stringify(savedAnalytics.data)},
+                            chartType: '${savedAnalytics.type||'bar'}',
+                            todayScore: 7,
+                            showInput: false,
+                            get avg(){ var d=this.chartData.filter(v=>v!==null&&v!==undefined); return d.length?(d.reduce((a,b)=>a+b,0)/d.length).toFixed(1):'-'; },
+                            get best(){ var d=this.chartData.filter(v=>v!==null&&v!==undefined); return d.length?Math.max(...d):'-'; },
+                            get goodDays(){ return this.chartData.filter(v=>v!==null&&v!==undefined&&v>=7).length; },
+                            saveAndUpdate(){
+                                window._saveWidgetData('analytics',{data:this.chartData,type:this.chartType});
+                                var c=window.chartInstances['${chartId}'];
+                                if(c){c.data.datasets[0].data=[...this.chartData];c.update();}
+                            },
+                            logToday(){
+                                var idx=this.chartData.indexOf(null);
+                                if(idx!==-1){ var nd=[...this.chartData]; nd[idx]=parseInt(this.todayScore)||7; this.chartData=nd; }
+                                else { this.chartData=[...this.chartData.slice(1),parseInt(this.todayScore)||7]; }
+                                this.saveAndUpdate(); this.showInput=false;
+                            },
+                            toggleType(){
+                                this.chartType=this.chartType==='bar'?'line':'bar';
+                                window._saveWidgetData('analytics',{data:this.chartData,type:this.chartType});
+                                var c=window.chartInstances['${chartId}'];
+                                if(c){ c.destroy(); delete window.chartInstances['${chartId}']; }
+                                window._rebuildAnalyticsChart('${chartId}', this.chartData, this.chartType);
+                            },
+                            resetData(){ this.chartData=[null,null,null,null,null,null,null]; this.saveAndUpdate(); }
+                        }">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="bar-chart-3" class="w-4 h-4 text-violet-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.analytics}</h3>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button @click="toggleType()" class="action-btn text-xs px-2 py-1 rounded-lg text-violet-400">
+                                    <i :data-lucide="chartType==='bar'?'trending-up':'bar-chart-2'" class="w-3 h-3"></i>
+                                </button>
+                                <button @click="showInput=!showInput" class="action-btn text-xs flex items-center gap-1 px-2 py-1 rounded-lg text-violet-400">
+                                    <i :data-lucide="showInput?'minus':'plus'" class="w-3 h-3"></i>
+                                    <span class="hidden sm:inline text-xs">${statLabels.log}</span>
+                                </button>
+                                <button @click="resetData()" class="action-btn reset text-xs px-2 py-1 rounded-lg">
+                                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div x-show="showInput" x-transition class="mb-3 p-3 rounded-xl" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <p class="text-[10px] opacity-40 uppercase tracking-widest mb-2">${statLabels.today}</p>
+                            <div class="flex items-center gap-2">
+                                <input type="range" min="1" max="10" x-model.number="todayScore" class="flex-1 accent-violet-500 cursor-pointer">
+                                <span class="text-sm font-bold w-6 text-center text-violet-400 font-mono" x-text="todayScore"></span>
+                                <button @click="logToday()" class="rounded-xl px-3 py-1.5 text-xs transition-all" style="background:rgba(139,92,246,0.35);border:1px solid rgba(139,92,246,0.40)">OK</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-violet-400 font-mono" x-text="avg"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${statLabels.avg}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-emerald-400 font-mono" x-text="best"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${statLabels.best}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-blue-400 font-mono" x-text="goodDays"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${statLabels.goodDays}</p>
+                            </div>
+                        </div>
+                        <div class="h-28"><canvas id="${chartId}" data-chart-id="${chartId}" data-labels="${labels.replace(/"/g,'&quot;')}"></canvas></div>
+                    </div>`;
+                },
+
+                expensesTemplate() {
+                    const savedExpenses = this.getWidgetData('expenses', [{amt:12.5,cat:'Comida'},{amt:25,cat:'Transporte'}]);
+                    return `<div x-data="{expenses: ${JSON.stringify(savedExpenses).replace(/"/g,'&quot;')}, newAmt: '', newCat: 'Comida'}"
+                         x-init="$watch('expenses', v => window._saveWidgetData('expenses', v))">
+                        <div class="flex items-center gap-2 mb-3 pr-8">
+                            <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+                            <h3 class="font-semibold text-sm tracking-tight">${this.t.expenses}</h3>
+                        </div>
+                        <p class="text-2xl font-semibold tracking-tighter" x-text="'$' + expenses.reduce((a,b)=>a+b.amt,0).toFixed(2)"></p>
+                        <div class="flex gap-2 mt-3">
+                            <input type="number" x-model="newAmt" placeholder="0.00" class="glass-input w-16 px-2 py-1 text-xs">
+                            <select x-model="newCat" class="glass-input flex-1 px-2 py-1 text-xs">
+                                <option>Comida</option><option>Transporte</option><option>Otros</option>
+                            </select>
+                            <button @click="if(newAmt){expenses.push({amt:parseFloat(newAmt),cat:newCat});newAmt=''}"
+                                    class="rounded-xl px-2 transition-all"
+                                    style="background:rgba(34,197,94,0.22);border:1px solid rgba(34,197,94,0.30);border-top-color:rgba(255,255,255,0.18)">
+                                <i data-lucide="plus" class="w-3 h-3 text-emerald-400"></i>
+                            </button>
+                        </div>
+                        <div class="mt-2 space-y-1 max-h-20 overflow-y-auto">
+                            <template x-for="(exp, i) in expenses" :key="i">
+                                <div class="flex justify-between items-center text-xs p-1.5 rounded-lg hover:bg-white/04 transition-all">
+                                    <span class="opacity-50 font-light" x-text="exp.cat"></span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-mono" x-text="'$' + exp.amt.toFixed(2)"></span>
+                                        <button @click="expenses.splice(i, 1)" class="text-red-400/60 hover:text-red-400 transition-colors">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                sleepTemplate() {
+                    const defaultSleep = { log:[], bedtime:'23:00', waketime:'06:30' };
+                    const raw = this.getWidgetData('sleep', defaultSleep);
+                    const sleepData = (typeof raw === 'number')
+                        ? { log:[{h:raw,q:3,d:new Date().toLocaleDateString()}], bedtime:'23:00', waketime:'06:30' }
+                        : (raw && raw.log ? raw : defaultSleep);
+                    const tx = {
+                        title: this.currentLang==='es'?'Análisis de Sueño':this.currentLang==='en'?'Sleep Analysis':this.currentLang==='de'?'Schlafanalyse':this.currentLang==='zh'?'睡眠分析':'Analiza snu',
+                        lastNight: this.currentLang==='es'?'Anoche':this.currentLang==='en'?'Last night':this.currentLang==='de'?'Letzte Nacht':this.currentLang==='zh'?'昨晚':'Wczoraj',
+                        avg: this.currentLang==='es'?'Promedio':this.currentLang==='en'?'Average':this.currentLang==='de'?'Durchschn.':this.currentLang==='zh'?'平均':'Śr.',
+                        best: this.currentLang==='es'?'Mejor':this.currentLang==='en'?'Best':this.currentLang==='de'?'Beste':this.currentLang==='zh'?'最佳':'Najl.',
+                        streak: this.currentLang==='es'?'Racha':this.currentLang==='en'?'Streak':this.currentLang==='de'?'Serie':this.currentLang==='zh'?'连续':'Seria',
+                        quality: this.currentLang==='es'?'Calidad':this.currentLang==='en'?'Quality':this.currentLang==='de'?'Qualität':this.currentLang==='zh'?'质量':'Jakość',
+                        bedtime: this.currentLang==='es'?'Dormir':this.currentLang==='en'?'Bedtime':this.currentLang==='de'?'Schlafzeit':this.currentLang==='zh'?'睡觉':'Spanie',
+                        wakeup: this.currentLang==='es'?'Despertar':this.currentLang==='en'?'Wake up':this.currentLang==='de'?'Aufwachen':this.currentLang==='zh'?'起床':'Wstanie',
+                        log: this.currentLang==='es'?'Registrar':this.currentLang==='en'?'Log':this.currentLang==='de'?'Eintragen':this.currentLang==='zh'?'记录':'Zapisz',
+                        noData: this.currentLang==='es'?'Sin registros aún':this.currentLang==='en'?'No records yet':this.currentLang==='de'?'Keine Einträge':this.currentLang==='zh'?'暂无记录':'Brak danych',
+                        hours: this.currentLang==='es'?'Horas dormidas':this.currentLang==='en'?'Hours slept':this.currentLang==='de'?'Geschlafene Stunden':this.currentLang==='zh'?'睡眠时间':'Godziny snu',
+                        poor: this.currentLang==='es'?'Malo':this.currentLang==='en'?'Poor':this.currentLang==='de'?'Schlecht':this.currentLang==='zh'?'差':'Słabo',
+                        ok: this.currentLang==='es'?'Regular':this.currentLang==='en'?'Fair':this.currentLang==='de'?'Mäßig':this.currentLang==='zh'?'一般':'Przeciętnie',
+                        good: this.currentLang==='es'?'Bueno':this.currentLang==='en'?'Good':this.currentLang==='de'?'Gut':this.currentLang==='zh'?'好':'Dobrze',
+                        great: this.currentLang==='es'?'Muy bueno':this.currentLang==='en'?'Great':this.currentLang==='de'?'Super':this.currentLang==='zh'?'很好':'Świetnie',
+                        excellent: this.currentLang==='es'?'Excelente':this.currentLang==='en'?'Excellent':this.currentLang==='de'?'Ausgezeichnet':this.currentLang==='zh'?'极好':'Doskonale'
+                    };
+                    return `<div x-data="{
+                            log: ${JSON.stringify(sleepData.log).replace(/"/g,'&quot;')},
+                            bedtime: '${sleepData.bedtime}', waketime: '${sleepData.waketime}',
+                            newHours: '', newQuality: 3, showAdd: false,
+                            get last(){ return this.log.length?this.log[this.log.length-1]:null; },
+                            get avg(){ var d=this.log.filter(e=>e.h); return d.length?(d.reduce((a,b)=>a+b.h,0)/d.length).toFixed(1):'-'; },
+                            get best(){ var d=this.log.filter(e=>e.h); return d.length?Math.max(...d.map(e=>e.h)):'-'; },
+                            get streak(){ var s=0,arr=[...this.log].reverse(); for(var e of arr){if(e.h>=7)s++;else break;} return s; },
+                            hColor(h){ return h>=8?'#22c55e':h>=7?'#3b82f6':h>=6?'#eab308':'#ef4444'; },
+                            hLabel(h){ return h>=8?'${tx.excellent}':h>=7?'${tx.great}':h>=6?'${tx.good}':h>=5?'${tx.ok}':'${tx.poor}'; },
+                            qEmoji(q){ return ['😴','😐','🙂','😊','⭐'][q-1]||'😐'; },
+                            barH(h){ return Math.min(Math.round((h/10)*100),100); },
+                            saveAll(){ window._saveWidgetData('sleep',{log:this.log,bedtime:this.bedtime,waketime:this.waketime}); },
+                            addLog(){
+                                var h=parseFloat(this.newHours);
+                                if(!h||h<=0||h>24)return;
+                                var now=new Date();
+                                var d=now.toLocaleDateString('${this.currentLang==='zh'?'zh-CN':this.currentLang==='de'?'de-DE':this.currentLang==='pl'?'pl-PL':this.currentLang==='en'?'en-US':'es-ES'}',{day:'2-digit',month:'short'});
+                                this.log=[...this.log.slice(-6),{h:h,q:this.newQuality,d:d}];
+                                this.newHours=''; this.showAdd=false; this.saveAll();
+                            },
+                            calcFromTimes(){
+                                if(!this.bedtime||!this.waketime)return;
+                                var [bh,bm]=this.bedtime.split(':').map(Number);
+                                var [wh,wm]=this.waketime.split(':').map(Number);
+                                var mins=(wh*60+wm)-(bh*60+bm);
+                                if(mins<0)mins+=1440;
+                                this.newHours=(mins/60).toFixed(1);
+                            }
+                        }" x-init="saveAll">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="moon" class="w-4 h-4 text-indigo-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${tx.title}</h3>
+                            </div>
+                            <button @click="showAdd=!showAdd" class="action-btn text-indigo-400 flex items-center gap-1 px-2 py-1 rounded-lg text-xs">
+                                <i :data-lucide="showAdd?'minus':'plus'" class="w-3 h-3"></i>
+                                <span>${tx.log}</span>
+                            </button>
+                        </div>
+                        <template x-if="last">
+                            <div class="flex items-center justify-between mb-3 p-3 rounded-2xl" :style="'background:'+hColor(last.h)+'18;border:1px solid '+hColor(last.h)+'35'">
+                                <div>
+                                    <p class="text-2xl font-semibold tracking-tighter font-mono" :style="'color:'+hColor(last.h)" x-text="last.h+'h'"></p>
+                                    <p class="text-[10px] opacity-45 font-light">${tx.lastNight} • <span x-text="last.d"></span></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xl" x-text="qEmoji(last.q)"></p>
+                                    <p class="text-[10px] font-medium" :style="'color:'+hColor(last.h)" x-text="hLabel(last.h)"></p>
+                                </div>
+                            </div>
+                        </template>
+                        <template x-if="!last">
+                            <div class="text-center py-3 opacity-30">
+                                <i data-lucide="moon" class="w-8 h-8 mx-auto mb-1"></i>
+                                <p class="text-xs font-light">${tx.noData}</p>
+                            </div>
+                        </template>
+                        <div x-show="showAdd" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.bedtime}</p>
+                                    <input type="time" x-model="bedtime" @change="calcFromTimes()" class="glass-input w-full px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.wakeup}</p>
+                                    <input type="time" x-model="waketime" @change="calcFromTimes()" class="glass-input w-full px-2 py-1 text-xs">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1">
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.hours}</p>
+                                    <input type="number" x-model="newHours" step="0.5" min="0" max="24" placeholder="7.5" class="glass-input w-full px-2 py-1 text-xs">
+                                </div>
+                                <div>
+                                    <p class="text-[10px] opacity-40 mb-1 uppercase tracking-wider">${tx.quality}</p>
+                                    <div class="flex gap-1">
+                                        <template x-for="q in [1,2,3,4,5]" :key="q">
+                                            <button @click="newQuality=q" class="text-base transition-all" :style="newQuality===q?'transform:scale(1.3)':'opacity:0.4'" x-text="qEmoji(q)"></button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                            <button @click="addLog()" :disabled="!newHours" class="w-full py-1.5 rounded-xl text-xs font-medium transition-all disabled:opacity-30" style="background:rgba(99,102,241,0.35);border:1px solid rgba(99,102,241,0.40);border-top-color:rgba(255,255,255,0.20)">${tx.log}</button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-indigo-400 font-mono" x-text="avg+'h'"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${tx.avg}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-emerald-400 font-mono" x-text="best!=='-'?best+'h':'-'"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${tx.best}</p>
+                            </div>
+                            <div class="rounded-xl p-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06)">
+                                <p class="text-base font-semibold text-violet-400 font-mono" x-text="streak"></p>
+                                <p class="text-[10px] opacity-35 uppercase tracking-wider">${tx.streak}</p>
+                            </div>
+                        </div>
+                        <template x-if="log.length > 0">
+                            <div>
+                                <div class="flex items-end justify-between gap-1 h-14">
+                                    <template x-for="(entry, i) in log.slice(-7)" :key="i">
+                                        <div class="flex-1 flex flex-col items-center gap-0.5">
+                                            <div class="w-full rounded-t transition-all" :style="'height:'+barH(entry.h)+'%;background:'+hColor(entry.h)+'90;min-height:4px;border-radius:4px 4px 2px 2px'" :title="entry.h+'h'"></div>
+                                            <span class="text-[8px] opacity-30 font-mono" x-text="entry.d.split('/')[0]||entry.d.substring(0,3)"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>`;
+                },
+
+                moodTemplate() {
+                    const savedMood = this.getWidgetData('mood', null);
+                    return `<div x-data="{mood: ${savedMood===null?'null':savedMood}, moods: [{v:1,e:'😢'},{v:2,e:'😕'},{v:3,e:'😐'},{v:4,e:'🙂'},{v:5,e:'😄'}]}"
+                         x-init="$watch('mood', v => window._saveWidgetData('mood', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="smile" class="w-4 h-4 text-pink-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.mood}</h3>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-4 py-3">
+                            <template x-for="m in moods">
+                                <button @click="mood = m.v"
+                                        class="text-3xl transition-all hover:scale-125"
+                                        :class="mood === m.v ? 'scale-125' : 'opacity-40'"
+                                        :style="mood === m.v ? 'filter:drop-shadow(0 0 12px rgba(255,150,200,0.6))' : ''"
+                                        x-text="m.e"></button>
+                            </template>
+                        </div>
+                        <div class="flex gap-1.5 justify-center mt-3">
+                            <template x-for="i in 7">
+                                <div class="w-6 h-1.5 rounded-full" style="background:rgba(255,255,255,0.10);border:0.5px solid rgba(255,255,255,0.06)"></div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                habitsTemplate() {
+                    const habitNames = {
+                        meditate: this.currentLang==='es'?'Meditar':this.currentLang==='en'?'Meditate':this.currentLang==='de'?'Meditieren':this.currentLang==='zh'?'冥想':'Medytacja',
+                        exercise: this.currentLang==='es'?'Ejercicio':this.currentLang==='en'?'Exercise':this.currentLang==='de'?'Sport':this.currentLang==='zh'?'锻炼':'Ćwiczenia',
+                        read: this.currentLang==='es'?'Leer':this.currentLang==='en'?'Read':this.currentLang==='de'?'Lesen':this.currentLang==='zh'?'阅读':'Czytanie'
+                    };
+                    const savedHabits = this.getWidgetData('habits', [
+                        {n:habitNames.meditate,p:60,c:'#a855f7',i:'brain'},
+                        {n:habitNames.exercise,p:40,c:'#f97316',i:'dumbbell'},
+                        {n:habitNames.read,p:80,c:'#3b82f6',i:'book-open'}
+                    ]);
+                    return `<div x-data="{habits: ${JSON.stringify(savedHabits).replace(/"/g,'&quot;')}}" x-init="$watch('habits', v => window._saveWidgetData('habits', v))">
+                        <div class="flex items-center justify-between mb-4 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="target" class="w-4 h-4 text-rose-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.habits}</h3>
+                            </div>
+                            <button @click="habits.forEach(h => h.p = 0)" class="action-btn reset text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                <span class="hidden sm:inline">${this.t.reset}</span>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-3 gap-4">
+                            <template x-for="(h,i) in habits">
+                                <div class="flex flex-col items-center cursor-pointer" @click="h.p = Math.min(100, h.p + 20)">
+                                    <div class="relative w-16 h-16">
+                                        <svg class="w-full h-full transform -rotate-90">
+                                            <circle cx="32" cy="32" r="28" stroke="rgba(255,255,255,0.07)" stroke-width="4" fill="none"/>
+                                            <circle cx="32" cy="32" r="28" :stroke="h.c" stroke-width="4" fill="none" stroke-linecap="round"
+                                                    :stroke-dasharray="175" :stroke-dashoffset="175 - (175 * h.p / 100)"/>
+                                        </svg>
+                                        <div class="absolute inset-0 flex items-center justify-center">
+                                            <i :data-lucide="h.i" class="w-4 h-4" :style="'color:'+h.c"></i>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs mt-1.5 text-center font-light" x-text="h.n"></span>
+                                    <span class="text-[10px] opacity-35 font-mono" x-text="h.p + '%'"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                linksTemplate() {
+                    const savedLinks = this.getWidgetData('links', [
+                        {n:'GitHub',u:'https://github.com',i:'github',bg:'#24292e'},
+                        {n:'Gmail',u:'https://gmail.com',i:'mail',bg:'#ea4335'},
+                        {n:'Notion',u:'https://notion.so',i:'file-text',bg:'#2d2d2d'}
+                    ]);
+                    return `<div x-data="{links: ${JSON.stringify(savedLinks).replace(/"/g,'&quot;')}, showAdd: false, newName: '', newUrl: '', newIcon: 'link', newColor: '#6366f1', editMode: false}" x-init="$watch('links', v => window._saveWidgetData('links', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="link" class="w-4 h-4 text-sky-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.links}</h3>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button @click="editMode = !editMode" class="action-btn text-xs flex items-center gap-1 px-2 py-1 rounded-lg" :class="editMode ? 'text-red-400' : 'text-sky-400'">
+                                    <i :data-lucide="editMode ? 'x-circle' : 'pencil'" class="w-3 h-3"></i>
+                                </button>
+                                <button @click="showAdd = !showAdd" class="action-btn text-sky-400 text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                    <i :data-lucide="showAdd ? 'minus' : 'plus'" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div x-show="showAdd" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <div class="flex gap-2">
+                                <input type="text" x-model="newName" placeholder="${this.currentLang==='es'?'Nombre':this.currentLang==='en'?'Name':'Name'}" class="glass-input flex-1 px-2 py-1.5 text-xs">
+                                <input type="color" x-model="newColor" class="w-8 h-8 rounded-xl overflow-hidden cursor-pointer border-0 bg-transparent">
+                            </div>
+                            <input type="text" x-model="newUrl" placeholder="https://..." @keydown.enter="if(newName.trim()&&newUrl.trim()){links.push({n:newName,u:newUrl.startsWith('http')?newUrl:'https://'+newUrl,i:newIcon,bg:newColor});newName='';newUrl='';showAdd=false}" class="glass-input w-full px-2 py-1.5 text-xs">
+                            <div class="flex gap-2">
+                                <select x-model="newIcon" class="glass-input flex-1 px-2 py-1.5 text-xs">
+                                    <option value="link">🔗 Link</option><option value="github">🐙 GitHub</option>
+                                    <option value="mail">📧 Mail</option><option value="file-text">📄 Docs</option>
+                                    <option value="globe">🌐 Web</option><option value="code">💻 Code</option>
+                                    <option value="star">⭐ Star</option><option value="heart">❤️ Fav</option>
+                                </select>
+                                <button @click="if(newName.trim()&&newUrl.trim()){links.push({n:newName,u:newUrl.startsWith('http')?newUrl:'https://'+newUrl,i:newIcon,bg:newColor});newName='';newUrl='';showAdd=false}"
+                                        class="rounded-xl px-3 py-1.5 text-xs transition-all"
+                                        style="background:rgba(14,165,233,0.25);border:1px solid rgba(14,165,233,0.35)">
+                                    <i data-lucide="plus" class="w-3 h-3 text-sky-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2">
+                            <template x-for="(link, idx) in links" :key="idx">
+                                <div class="relative group/link">
+                                    <a :href="editMode ? '#' : link.u" @click.prevent="editMode ? null : window.open(link.u, '_blank')"
+                                       class="flex flex-col items-center p-2 rounded-2xl transition-all hover:scale-105 w-full"
+                                       :style="'background:'+link.bg+';border:1px solid rgba(255,255,255,0);border-top-color:rgba(255,255,255,0.22);box-shadow:0 1px 0 rgba(255,255,255,0.14) inset,0 4px 12px '+link.bg+'55'"
+                                       :class="editMode ? 'opacity-70' : ''">
+                                        <i :data-lucide="link.i" class="w-5 h-5 text-white mb-1"></i>
+                                        <span class="text-[9px] text-white/80 truncate w-full text-center font-medium" x-text="link.n"></span>
+                                    </a>
+                                    <button x-show="editMode" @click="links.splice(idx,1)"
+                                            class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 flex items-center justify-center shadow-lg">
+                                        <i data-lucide="x" class="w-2.5 h-2.5 text-white"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                shoppingTemplate() {
+                    const savedItems = this.getWidgetData('shopping', [
+                        {t:this.currentLang==='es'?'Leche':this.currentLang==='en'?'Milk':this.currentLang==='de'?'Milch':this.currentLang==='zh'?'牛奶':'Mleko',c:false,cat:'super'},
+                        {t:this.currentLang==='es'?'Pan':this.currentLang==='en'?'Bread':this.currentLang==='de'?'Brot':this.currentLang==='zh'?'面包':'Chleb',c:true,cat:'super'},
+                        {t:this.currentLang==='es'?'Huevos':this.currentLang==='en'?'Eggs':this.currentLang==='de'?'Eier':this.currentLang==='zh'?'鸡蛋':'Jajka',c:false,cat:'super'}
+                    ]);
+                    return `<div x-data="{items: ${JSON.stringify(savedItems).replace(/"/g,'&quot;')}, newItem: '', newCategory: 'general'}"
+                         x-init="$watch('items', v => window._saveWidgetData('shopping', v))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="shopping-cart" class="w-4 h-4 text-amber-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.shopping}</h3>
+                            </div>
+                            <button @click="items = items.filter(i => !i.c)" x-show="items.some(i => i.c)"
+                                    class="action-btn text-xs flex items-center gap-1 px-2 py-1 rounded-lg text-amber-400">
+                                <i data-lucide="check-check" class="w-3 h-3"></i>
+                                <span class="hidden sm:inline">${this.t.clearCompleted}</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" x-model="newItem"
+                                   @keydown.enter="if(newItem.trim()){items.push({t:newItem,c:false,cat:newCategory});newItem=''}"
+                                   placeholder="${this.currentLang==='es'?'Agregar...':this.currentLang==='en'?'Add item...':'Add...'}"
+                                   class="glass-input flex-1 px-3 py-2 text-sm placeholder-white/20">
+                            <select x-model="newCategory" class="glass-input px-2 py-2 text-xs">
+                                <option value="general">General</option>
+                                <option value="super">${this.currentLang==='es'?'Super':this.currentLang==='en'?'Grocery':'Supermarkt'}</option>
+                                <option value="farmacia">${this.currentLang==='es'?'Farmacia':this.currentLang==='en'?'Pharmacy':'Apotheke'}</option>
+                            </select>
+                            <button @click="if(newItem.trim()){items.push({t:newItem,c:false,cat:newCategory});newItem=''}"
+                                    class="rounded-xl px-3 transition-all"
+                                    style="background:rgba(245,158,11,0.22);border:1px solid rgba(245,158,11,0.30);border-top-color:rgba(255,255,255,0.18)">
+                                <i data-lucide="plus" class="w-4 h-4 text-amber-400"></i>
+                            </button>
+                        </div>
+                        <div class="space-y-1.5 max-h-48 overflow-y-auto">
+                            <template x-for="(item, i) in items" :key="i">
+                                <div class="flex items-center gap-2 p-2 rounded-xl transition-all"
+                                     :style="item.c ? 'opacity:0.40' : 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.10)'">
+                                    <button @click="item.c = !item.c"
+                                            class="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                                            :style="item.c ? 'background:rgba(245,158,11,0.70);border-color:transparent;box-shadow:0 1px 0 rgba(255,255,255,0.18) inset' : 'border-color:rgba(255,255,255,0.22)'">
+                                        <i data-lucide="check" class="w-2.5 h-2.5 text-white" x-show="item.c"></i>
+                                    </button>
+                                    <div class="flex-1 min-w-0">
+                                        <span class="text-sm block truncate font-light" :class="{'line-through':item.c}" x-text="item.t"></span>
+                                        <span class="text-[9px] opacity-30 uppercase tracking-wider" x-text="item.cat"></span>
+                                    </div>
+                                    <button @click="items.splice(i,1)" class="action-btn delete w-5 h-5 flex items-center justify-center flex-shrink-0">
+                                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                readingTemplate() {
+                    const savedReading = this.getWidgetData('reading', { current:{t:'Atomic Habits',a:'James Clear',p:65}, toRead:[{t:'Deep Work',a:'Cal Newport'}] });
+                    return `<div x-data="{current: ${JSON.stringify(savedReading.current).replace(/"/g,'&quot;')}, toRead: ${JSON.stringify(savedReading.toRead).replace(/"/g,'&quot;')}, showAddBook: false, newBookTitle: '', newBookAuthor: ''}"
+                         x-init="$watch('current', v => window._saveWidgetData('reading', {current: v, toRead: toRead})); $watch('toRead', v => window._saveWidgetData('reading', {current: current, toRead: v}))">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="book-open" class="w-4 h-4 text-violet-400"></i>
+                                <h3 class="font-semibold tracking-tight">${this.t.reading}</h3>
+                            </div>
+                            <button @click="showAddBook = !showAddBook" class="action-btn text-violet-400 text-xs flex items-center gap-1 px-2 py-1 rounded-lg">
+                                <i :data-lucide="showAddBook ? 'minus' : 'plus'" class="w-3 h-3"></i>
+                            </button>
+                        </div>
+                        <div x-show="showAddBook" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <input type="text" x-model="newBookTitle" placeholder="${this.currentLang==='es'?'Título':this.currentLang==='en'?'Title':'Titel'}" class="glass-input w-full px-2 py-1.5 text-xs">
+                            <div class="flex gap-2">
+                                <input type="text" x-model="newBookAuthor" placeholder="${this.currentLang==='es'?'Autor':'Author'}" @keydown.enter="if(newBookTitle.trim()){toRead.push({t:newBookTitle,a:newBookAuthor||'?'});newBookTitle='';newBookAuthor='';showAddBook=false}" class="glass-input flex-1 px-2 py-1.5 text-xs">
+                                <button @click="if(newBookTitle.trim()){toRead.push({t:newBookTitle,a:newBookAuthor||'?'});newBookTitle='';newBookAuthor='';showAddBook=false}"
+                                        class="rounded-xl px-3 transition-all"
+                                        style="background:rgba(139,92,246,0.25);border:1px solid rgba(139,92,246,0.35)">
+                                    <i data-lucide="plus" class="w-3 h-3 text-violet-400"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl p-3 mb-3" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)">
+                            <p class="text-[10px] opacity-35 uppercase tracking-widest mb-2">${this.currentLang==='es'?'Leyendo ahora':this.currentLang==='en'?'Reading now':'Jetzt lesen'}</p>
+                            <div x-show="current.t">
+                                <p class="font-medium text-sm" x-text="current.t"></p>
+                                <p class="text-xs opacity-45 font-light" x-text="current.a"></p>
+                                <div class="mt-2.5">
+                                    <div class="flex justify-between text-xs opacity-35 mb-1">
+                                        <span class="uppercase tracking-wider text-[10px]">${this.currentLang==='es'?'Progreso':this.currentLang==='en'?'Progress':'Fortschritt'}</span>
+                                        <span class="font-mono" x-text="current.p + '%'"></span>
+                                    </div>
+                                    <input type="range" min="0" max="100" x-model.number="current.p" class="w-full h-1 rounded-full accent-violet-500 cursor-pointer">
+                                </div>
+                                <div class="flex gap-2 mt-2">
+                                    <button @click="current.p = Math.min(100, current.p + 10)" class="flex-1 rounded-xl py-1 text-[10px] transition-all" style="background:rgba(139,92,246,0.20);border:1px solid rgba(139,92,246,0.25)">+10%</button>
+                                    <button @click="current.p = 100" class="flex-1 rounded-xl py-1 text-[10px] transition-all" style="background:rgba(34,197,94,0.20);border:1px solid rgba(34,197,94,0.25)">${this.currentLang==='es'?'Terminar':this.currentLang==='en'?'Finish':'Fertig'}</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-1 max-h-32 overflow-y-auto">
+                            <template x-for="(book, idx) in toRead" :key="idx">
+                                <div class="flex items-center gap-2 p-2 rounded-xl text-xs transition-all" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)">
+                                    <div class="flex-1 min-w-0">
+                                        <p class="font-medium truncate" x-text="book.t"></p>
+                                        <p class="opacity-40 truncate font-light" x-text="book.a"></p>
+                                    </div>
+                                    <div class="flex gap-1 flex-shrink-0">
+                                        <button @click="current = {t: book.t, a: book.a, p: 0}; toRead.splice(idx, 1)" class="action-btn check w-5 h-5 rounded flex items-center justify-center text-emerald-400">
+                                            <i data-lucide="book-open" class="w-3 h-3"></i>
+                                        </button>
+                                        <button @click="toRead.splice(idx, 1)" class="action-btn delete w-5 h-5 rounded flex items-center justify-center text-red-400">
+                                            <i data-lucide="x" class="w-3 h-3"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                clockTemplate() {
+                    const defaultCities = [
+                        {n:'Nueva York',tz:'America/New_York'},{n:'Londres',tz:'Europe/London'},
+                        {n:'París',tz:'Europe/Paris'},{n:'Tokio',tz:'Asia/Tokyo'}
+                    ];
+                    const rawClock = this.getWidgetData('clock', defaultCities);
+                    const cities = Array.isArray(rawClock) ? rawClock.map(c => c.tz?c:{n:c.n,tz:'UTC'}) : defaultCities;
+                    const tx = {
+                        title: this.currentLang==='es'?'Reloj Mundial':this.currentLang==='en'?'World Clock':this.currentLang==='de'?'Weltuhr':this.currentLang==='zh'?'世界时钟':'Zegar Światowy',
+                        add: this.currentLang==='es'?'Agregar':this.currentLang==='en'?'Add':this.currentLang==='de'?'Hinzufügen':this.currentLang==='zh'?'添加':'Dodaj',
+                        cityName: this.currentLang==='es'?'Nombre ciudad':this.currentLang==='en'?'City name':'City name',
+                        cancel: this.currentLang==='es'?'Cancelar':this.currentLang==='en'?'Cancel':'Cancel'
+                    };
+                    const tzList = [
+                        {l:'UTC',v:'UTC'},{l:'Nueva York',v:'America/New_York'},{l:'Los Ángeles',v:'America/Los_Angeles'},
+                        {l:'México DF',v:'America/Mexico_City'},{l:'Buenos Aires',v:'America/Argentina/Buenos_Aires'},
+                        {l:'São Paulo',v:'America/Sao_Paulo'},{l:'Londres',v:'Europe/London'},{l:'Madrid',v:'Europe/Madrid'},
+                        {l:'París',v:'Europe/Paris'},{l:'Berlín',v:'Europe/Berlin'},{l:'Moscú',v:'Europe/Moscow'},
+                        {l:'Dubái',v:'Asia/Dubai'},{l:'Mumbai',v:'Asia/Kolkata'},{l:'Bangkok',v:'Asia/Bangkok'},
+                        {l:'Singapur',v:'Asia/Singapore'},{l:'Beijing',v:'Asia/Shanghai'},{l:'Tokio',v:'Asia/Tokyo'},
+                        {l:'Seúl',v:'Asia/Seoul'},{l:'Sydney',v:'Australia/Sydney'},{l:'Auckland',v:'Pacific/Auckland'}
+                    ];
+                    return `<div x-data="{
+                            cities: ${JSON.stringify(cities).replace(/"/g,'&quot;')},
+                            times: {}, dates: {},
+                            showAdd: false, newName: '', newTz: 'Europe/London', _timer: null,
+                            tzList: ${JSON.stringify(tzList).replace(/"/g,'&quot;')},
+                            getTime(tz){ try{ return new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:tz}); }catch(e){return '--:--';} },
+                            getDate(tz){ try{ return new Date().toLocaleDateString('es-ES',{weekday:'short',day:'numeric',month:'short',timeZone:tz}); }catch(e){return '';} },
+                            isToday(tz){ try{ return new Date().toLocaleDateString('en-CA')===new Date().toLocaleDateString('en-CA',{timeZone:tz}); }catch(e){return true;} },
+                            refresh(){ var t={},d={}; this.cities.forEach(c=>{t[c.tz]=this.getTime(c.tz);d[c.tz]=this.getDate(c.tz);}); this.times=t;this.dates=d; },
+                            addCity(){ if(!this.newName.trim())return; this.cities=[...this.cities,{n:this.newName.trim(),tz:this.newTz}]; this.newName='';this.showAdd=false;this.refresh();window._saveWidgetData('clock',this.cities); },
+                            removeCity(i){ this.cities=this.cities.filter((_,idx)=>idx!==i);this.refresh();window._saveWidgetData('clock',this.cities); }
+                        }"
+                        x-init="refresh();_timer=setInterval(()=>refresh(),10000);$watch('cities',()=>window._saveWidgetData('clock',cities));"
+                        x-effect="refresh()">
+                        <div class="flex items-center justify-between mb-3 pr-8">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="globe" class="w-4 h-4 text-cyan-400"></i>
+                                <h3 class="font-semibold text-sm tracking-tight">${tx.title}</h3>
+                            </div>
+                            <button @click="showAdd=!showAdd" class="action-btn text-cyan-400 flex items-center gap-1 px-2 py-1 rounded-lg text-xs">
+                                <i :data-lucide="showAdd?'minus':'plus'" class="w-3 h-3"></i>
+                                <span>${tx.add}</span>
+                            </button>
+                        </div>
+                        <div x-show="showAdd" x-transition class="mb-3 p-3 rounded-xl space-y-2" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-top-color:rgba(255,255,255,0.14)">
+                            <input type="text" x-model="newName" placeholder="${tx.cityName}" @keydown.enter="addCity()" class="glass-input w-full px-2 py-1.5 text-xs">
+                            <select x-model="newTz" class="glass-input w-full px-2 py-1.5 text-xs">
+                                <template x-for="tz in tzList" :key="tz.v">
+                                    <option :value="tz.v" x-text="tz.l"></option>
+                                </template>
+                            </select>
+                            <div class="flex gap-2">
+                                <button @click="addCity()" class="flex-1 py-1.5 rounded-xl text-xs font-medium transition-all" style="background:rgba(6,182,212,0.25);border:1px solid rgba(6,182,212,0.35);border-top-color:rgba(255,255,255,0.18)">${tx.add}</button>
+                                <button @click="showAdd=false;newName=''" class="px-3 py-1.5 rounded-xl text-xs opacity-50 hover:opacity-80 transition-all" style="background:rgba(255,255,255,0.05)">${tx.cancel}</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <template x-for="(city, i) in cities" :key="city.tz+i">
+                                <div class="relative group/city rounded-2xl p-3 transition-all" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-top-color:rgba(255,255,255,0.12)">
+                                    <button @click.stop="removeCity(i)" class="absolute top-2 right-2 opacity-0 group-hover/city:opacity-100 transition-opacity text-red-400 rounded-full p-0.5" style="background:rgba(239,68,68,0.12)">
+                                        <i data-lucide="x" class="w-2.5 h-2.5"></i>
+                                    </button>
+                                    <p class="text-[11px] font-medium opacity-45 truncate pr-4 tracking-wide" x-text="city.n"></p>
+                                    <p class="text-2xl font-light font-mono tracking-tighter leading-tight" x-text="times[city.tz]||'--:--'"></p>
+                                    <p class="text-[9px] opacity-28 mt-0.5 font-light" x-text="dates[city.tz]||''"></p>
+                                    <span x-show="!isToday(city.tz)" class="inline-block text-[8px] rounded px-1 mt-0.5 font-medium" style="background:rgba(245,158,11,0.18);color:#fbbf24">+1d</span>
+                                </div>
+                            </template>
+                        </div>
+                    </div>`;
+                },
+
+                initCharts() {
+                    this.destroyCharts();
+                    document.querySelectorAll('canvas[data-chart-id]').forEach(canvas => {
+                        const chartId = canvas.getAttribute('data-chart-id');
+                        const savedAnalytics = (window._widgetDataCache && window._widgetDataCache['analytics'])
+                            ? window._widgetDataCache['analytics']
+                            : { data:[6,7,5,8,6,4,3], type:'bar' };
+                        let labels = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+                        try { const raw = canvas.getAttribute('data-labels'); if(raw) labels = JSON.parse(raw); } catch(e){}
+                        window._rebuildAnalyticsChart(chartId, savedAnalytics.data, savedAnalytics.type, labels, this.currentTheme, this.customColors);
+                    });
+                },
+
+                _setupRebuildHelper() {
+                    const self = this;
+                    window._rebuildAnalyticsChart = function(chartId, data, type, labels, theme, customColors) {
+                        const canvas = document.getElementById(chartId);
+                        if (!canvas) return;
+                        const ctx = canvas.getContext('2d');
+                        const currentTheme = theme || self.currentTheme;
+                        const cc = customColors || self.customColors;
+                        if (!labels) {
+                            try { labels = JSON.parse(canvas.getAttribute('data-labels')); } catch(e){}
+                            labels = labels || ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+                        }
+                        const primaryColor = currentTheme === 'custom' ? cc.primary : '#8b5cf6';
+                        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                        gradient.addColorStop(0, primaryColor + 'CC');
+                        gradient.addColorStop(1, primaryColor + '18');
+                        const isDark = currentTheme !== 'light';
+                        const tickColor = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.40)';
+                        const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+                        const tooltipBg = isDark ? 'rgba(10,10,20,0.92)' : 'rgba(255,255,255,0.96)';
+                        const tooltipColor = isDark ? '#fff' : '#000';
+                        window.chartInstances[chartId] = new Chart(ctx, {
+                            type: type || 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Score',
+                                    data: data || [null,null,null,null,null,null,null],
+                                    backgroundColor: type === 'line' ? primaryColor + '28' : gradient,
+                                    borderColor: primaryColor,
+                                    borderWidth: type === 'line' ? 2 : 0,
+                                    borderRadius: type === 'line' ? 0 : 8,
+                                    borderSkipped: false,
+                                    fill: type === 'line',
+                                    tension: 0.45,
+                                    pointBackgroundColor: primaryColor,
+                                    pointRadius: type === 'line' ? 3 : 0,
+                                    pointHoverRadius: 5,
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                animation: { duration: 700, easing: 'easeOutQuart' },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        backgroundColor: tooltipBg,
+                                        titleColor: tooltipColor,
+                                        bodyColor: tooltipColor,
+                                        borderColor: primaryColor + '45',
+                                        borderWidth: 1,
+                                        padding: 8,
+                                        cornerRadius: 10,
+                                        callbacks: { label: ctx => ctx.parsed.y !== null ? ' '+ctx.parsed.y+'/10' : ' No data' }
+                                    }
+                                },
+                                scales: {
+                                    x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 10, family: 'ui-monospace, monospace' } } },
+                                    y: { min: 0, max: 10, grid: { color: gridColor }, ticks: { color: tickColor, font: { size: 10, family: 'ui-monospace, monospace' }, stepSize: 2 } }
+                                }
+                            }
+                        });
+                    };
+                },
+
+                destroyCharts() {
+                    Object.values(window.chartInstances).forEach(chart => {
+                        if (chart && typeof chart.destroy === 'function') chart.destroy();
+                    });
+                    window.chartInstances = {};
+                },
+
+                reinitCharts() {
+                    this.destroyCharts();
+                    this.$nextTick(() => { setTimeout(() => this.initCharts(), 100); });
+                }
+            };
+        }
+    </script>
+</body>
+</html>
+
